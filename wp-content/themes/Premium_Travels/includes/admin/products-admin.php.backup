@@ -1,0 +1,296 @@
+        <table class="form-table">
+            <tr>
+                <th scope="row">Title *</th>
+                <td><input type="text" name="title" value="<?php echo esc_attr($product->title ?? ''); ?>" class="regular-text" required /></td>
+            </tr>
+            <tr>
+                <th scope="row">Slug</th>
+                <td><input type="text" name="slug" value="<?php echo esc_attr($product->slug ?? ''); ?>" class="regular-text" /></td>
+            </tr>
+            <tr>
+                <th scope="row">Description</th>
+                <td>
+                    <?php
+                    $content = $product->description ?? '';
+                    $editor_id = 'description';
+                    $settings = array(
+                        'textarea_rows' => 10,
+                        'media_buttons' => false,
+                    );
+                    wp_editor($content, $editor_id, $settings);
+                    ?>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Product Type</th>
+                <td>
+                    <select name="product_type" class="regular-text">
+                        <option value="tour" <?php selected($product->product_type ?? '', 'tour'); ?>>Tour</option>
+                        <option value="activity" <?php selected($product->product_type ?? '', 'activity'); ?>>Activity</option>
+                        <option value="experience" <?php selected($product->product_type ?? '', 'experience'); ?>>Experience</option>
+                        <option value="package" <?php selected($product->product_type ?? '', 'package'); ?>>Package</option>
+                        <option value="service" <?php selected($product->product_type ?? '', 'service'); ?>>Service</option>
+                        <option value="attraction" <?php selected($product->product_type ?? '', 'attraction'); ?>>Attraction</option>
+                        <option value="adventure" <?php selected($product->product_type ?? '', 'adventure'); ?>>Adventure</option>
+                        <option value="cultural" <?php selected($product->product_type ?? '', 'cultural'); ?>>Cultural</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Location</th>
+                <td>
+                    <select name="location_id" class="regular-text">
+                        <option value="">Select Location</option>
+                        <?php foreach ($locations as $location): ?>
+                            <option value="<?php echo esc_attr($location->id); ?>" <?php selected($product->location_id ?? '', $location->id); ?>>
+                                <?php echo esc_html($location->title); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Duration</th>
+                <td>
+                    <input type="text" name="duration" value="<?php echo esc_attr($product->duration ?? ''); ?>" class="regular-text" placeholder="e.g., 4 hours, Half Day, Full Day" />
+                    <br><small>Enter duration in text format</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Duration Hours</th>
+                <td>
+                    <input type="number" name="duration_hours" value="<?php echo esc_attr($product->duration_hours ?? ''); ?>" class="regular-text" step="0.1" placeholder="e.g., 4.5" />
+                    <br><small>Enter duration in decimal hours (optional)</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Pricing</th>
+                <td>
+                    <table>
+                        <tr>
+                            <td style="padding-right: 20px;">Regular Price:</td>
+                            <td><input type="number" name="price_per_person" value="<?php echo esc_attr($product->price_per_person ?? ''); ?>" step="0.01" placeholder="Regular price per person" /></td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 20px;">Discounted Price:</td>
+                            <td><input type="number" name="discounted_price" value="<?php echo esc_attr($product->discounted_price ?? ''); ?>" step="0.01" placeholder="Discounted price per person" /></td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 20px;">Discount (%):</td>
+                            <td><input type="number" name="discount_percentage" value="<?php echo esc_attr($product->discount_percentage ?? ''); ?>" step="0.01" max="100" placeholder="Discount percentage" /></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Person Limits</th>
+                <td>
+                    <table>
+                        <tr>
+                            <td style="padding-right: 20px;">Min Persons:</td>
+                            <td><input type="number" name="min_persons" value="<?php echo esc_attr($product->min_persons ?? 1); ?>" min="1" /></td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 20px;">Max Persons:</td>
+                            <td><input type="number" name="max_persons" value="<?php echo esc_attr($product->max_persons ?? 50); ?>" min="1" /></td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 20px;">Group Size Limit:</td>
+                            <td><input type="number" name="group_size_limit" value="<?php echo esc_attr($product->group_size_limit ?? 15); ?>" min="1" max="50" /></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Difficulty Level</th>
+                <td>
+                    <select name="difficulty_level" class="regular-text">
+                        <option value="easy" <?php selected($product->difficulty_level ?? 'easy', 'easy'); ?>>Easy</option>
+                        <option value="moderate" <?php selected($product->difficulty_level ?? 'easy', 'moderate'); ?>>Moderate</option>
+                        <option value="challenging" <?php selected($product->difficulty_level ?? 'easy', 'challenging'); ?>>Challenging</option>
+                        <option value="expert" <?php selected($product->difficulty_level ?? 'easy', 'expert'); ?>>Expert</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Age Requirements</th>
+                <td>
+                    <input type="text" name="age_requirements" value="<?php echo esc_attr($product->age_requirements ?? ''); ?>" class="regular-text" placeholder="e.g., Minimum age 12 years" />
+                    <br><small>Specify any age restrictions or requirements</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Physical Requirements</th>
+                <td>
+                    <textarea name="physical_requirements" class="regular-text" rows="3" placeholder="e.g., Moderate fitness level required"><?php echo esc_textarea($product->physical_requirements ?? ''); ?></textarea>
+                    <br><small>Any physical fitness requirements for participation</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">What to Expect</th>
+                <td>
+                    <textarea name="what_to_expect" class="regular-text" rows="4" placeholder="Describe what participants can expect"><?php echo esc_textarea($product->what_to_expect ?? ''); ?></textarea>
+                    <br><small>Detailed description of the experience</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">What to Bring</th>
+                <td>
+                    <textarea name="what_to_bring" class="regular-text" rows="3" placeholder="List of items participants should bring"><?php echo esc_textarea($product->what_to_bring ?? ''); ?></textarea>
+                    <br><small>Items participants should bring (comma separated)</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Safety Measures</th>
+                <td>
+                    <textarea name="safety_measures" class="regular-text" rows="3" placeholder="Safety information and measures"><?php echo esc_textarea($product->safety_measures ?? ''); ?></textarea>
+                    <br><small>Safety information and precautions</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Guide Languages</th>
+                <td>
+                    <input type="text" name="guide_language" value="<?php echo esc_attr($product->guide_language ?? ''); ?>" class="regular-text" placeholder="e.g., English, Hindi, Oriya" />
+                    <br><small>Comma separated list of languages available</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Highlights</th>
+                <td>
+                    <textarea name="highlights" class="regular-text" rows="3" placeholder="Key highlights (comma separated)"><?php echo esc_textarea($product->highlights ?? ''); ?></textarea>
+                    <br><small>Key highlights of the product (comma separated)</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Inclusions</th>
+                <td>
+                    <textarea name="inclusions" class="regular-text" rows="3" placeholder="What's included (comma separated)"><?php echo esc_textarea($product->inclusions ?? ''); ?></textarea>
+                    <br><small>What's included in the package (comma separated)</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Exclusions</th>
+                <td>
+                    <textarea name="excludes" class="regular-text" rows="3" placeholder="What's excluded (comma separated)"><?php echo esc_textarea($product->excludes ?? ''); ?></textarea>
+                    <br><small>What's not included (comma separated)</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Meeting Point</th>
+                <td>
+                    <input type="text" name="meeting_point" value="<?php echo esc_attr($product->meeting_point ?? ''); ?>" class="regular-text" placeholder="Meeting location" />
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Meeting Time</th>
+                <td>
+                    <input type="text" name="meeting_time" value="<?php echo esc_attr($product->meeting_time ?? ''); ?>" class="regular-text" placeholder="Meeting time" />
+                    <br><small>e.g., 9:00 AM, 10:30 AM</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Cancellation Policy</th>
+                <td>
+                    <textarea name="cancellation_policy" class="regular-text" rows="3" placeholder="Cancellation terms and conditions"><?php echo esc_textarea($product->cancellation_policy ?? ''); ?></textarea>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Travel Suggestions</th>
+                <td>
+                    <textarea name="travel_suggestions" class="regular-text" rows="3" placeholder="Related travel suggestions (comma separated)"><?php echo esc_textarea($product->travel_suggestions ?? ''); ?></textarea>
+                    <br><small>Related travel suggestions for this location (comma separated)</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Available Seasons</th>
+                <td>
+                    <textarea name="available_seasons" class="regular-text" rows="2" placeholder="Available seasons (comma separated)"><?php echo esc_textarea($product->available_seasons ?? ''); ?></textarea>
+                    <br><small>Best seasons for this activity (comma separated)</small>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Availability</th>
+                <td>
+                    <table>
+                        <tr>
+                            <td style="padding-right: 20px;">Type:</td>
+                            <td>
+                                <select name="availability_type">
+                                    <option value="always" <?php selected($product->availability_type ?? 'always', 'always'); ?>>Always Available</option>
+                                    <option value="seasonal" <?php selected($product->availability_type ?? 'always', 'seasonal'); ?>>Seasonal</option>
+                                    <option value="custom" <?php selected($product->availability_type ?? 'always', 'custom'); ?>>Custom Days</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 20px;">Available Days:</td>
+                            <td>
+                                <input type="text" name="available_days" value="<?php echo esc_attr($product->available_days ?? ''); ?>" class="regular-text" placeholder="e.g., 1,2,3,4,5 (Mon-Fri)" />
+                                <br><small>Comma separated days (1=Monday, 7=Sunday)</small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 20px;">Start Time:</td>
+                            <td><input type="time" name="start_time" value="<?php echo esc_attr($product->start_time ?? ''); ?>" /></td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 20px;">End Time:</td>
+                            <td><input type="time" name="end_time" value="<?php echo esc_attr($product->end_time ?? ''); ?>" /></td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 20px;">Max Bookings per Slot:</td>
+                            <td><input type="number" name="max_bookings_per_slot" value="<?php echo esc_attr($product->max_bookings_per_slot ?? 0); ?>" min="0" /> (0 for unlimited)</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Images</th>
+                <td>
+                    <table>
+                        <tr>
+                            <td style="padding-right: 20px;">Featured Image:</td>
+                            <td><input type="url" name="featured_image" value="<?php echo esc_url($product->featured_image ?? ''); ?>" class="regular-text" placeholder="Image URL" /></td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 20px;">Gallery Images:</td>
+                            <td><textarea name="gallery_images" class="regular-text" rows="3" placeholder="Additional image URLs (comma separated)"><?php echo esc_textarea($product->gallery_images ?? ''); ?></textarea></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">SEO Settings</th>
+                <td>
+                    <table>
+                        <tr>
+                            <td style="padding-right: 20px;">SEO Title:</td>
+                            <td><input type="text" name="seo_title" value="<?php echo esc_attr($product->seo_title ?? ''); ?>" class="regular-text" /></td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 20px;">SEO Description:</td>
+                            <td><textarea name="seo_description" class="regular-text" rows="2"><?php echo esc_textarea($product->seo_description ?? ''); ?></textarea></td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 20px;">Meta Keywords:</td>
+                            <td><input type="text" name="meta_keywords" value="<?php echo esc_attr($product->meta_keywords ?? ''); ?>" class="regular-text" placeholder="comma, separated, keywords" /></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Status & Sorting</th>
+                <td>
+                    <table>
+                        <tr>
+                            <td style="padding-right: 20px;"><input type="checkbox" name="is_featured" value="1" <?php checked($product->is_featured ?? false, true); ?> /> Featured</td>
+                            <td><input type="checkbox" name="is_available" value="1" <?php checked($product->is_available ?? true, true); ?> /> Available</td>
+                        </tr>
+                        <tr>
+                            <td style="padding-right: 20px;">Sort Order:</td>
+                            <td><input type="number" name="sort_order" value="<?php echo esc_attr($product->sort_order ?? 0); ?>" /></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
