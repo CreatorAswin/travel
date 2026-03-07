@@ -276,36 +276,37 @@ get_header();
                     <!-- Products List Container -->
                     <div class="products-list-container" style="display:flex;flex-direction:column;gap:15px;max-height:600px;overflow-y:auto;padding-right:5px;overflow-x:hidden;">
                         <?php
-                        global $wpdb;
-                        
-                        // Load products manager
-                        require_once get_template_directory() . '/includes/dynamic-management/products-manager.php';
-                        $products_manager = new PT_Products_Manager();
-                        
-                        // Get products from database (latest first)
-                        $products = $products_manager->get_all(array(
-                            'limit' => -1,
-                            'status' => 'active',
-                            'orderby' => 'created_at',
-                            'order' => 'DESC'
-                        ));
-                        
-                        if (!empty($products)):
-                            foreach ($products as $product):
-                                $p_price = $product->price_regular ?: 'Contact';
-                                $p_city = '';
-                                if ($product->location_id) {
-                                    $location = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}pt_locations WHERE id = %d AND is_active = 1", $product->location_id));
-                                    if ($location) {
-                                        $p_city = $location->title;
-                                    } else {
-                                        // Debug info for location issues
-                                        $p_city = '[Location ID ' . $product->location_id . ' not found]';
-                                    }
-                                }
-                                $p_city_simple = trim(explode(',', $p_city)[0]);
-                                $product_url = home_url('/product/' . $product->slug);
-                        ?>
+global $wpdb;
+
+// Load products manager
+require_once get_template_directory() . '/includes/dynamic-management/products-manager.php';
+$products_manager = new PT_Products_Manager();
+
+// Get products from database (latest first)
+$products = $products_manager->get_all(array(
+    'limit' => -1,
+    'status' => 'active',
+    'orderby' => 'created_at',
+    'order' => 'DESC'
+));
+
+if (!empty($products)):
+    foreach ($products as $product):
+        $p_price = $product->price_regular ?: 'Contact';
+        $p_city = '';
+        if ($product->location_id) {
+            $location = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}pt_locations WHERE id = %d AND is_active = 1", $product->location_id));
+            if ($location) {
+                $p_city = $location->title;
+            }
+            else {
+                // Debug info for location issues
+                $p_city = '[Location ID ' . $product->location_id . ' not found]';
+            }
+        }
+        $p_city_simple = trim(explode(',', $p_city)[0]);
+        $product_url = home_url('/product/' . $product->slug);
+?>
                                 <div class="product-item tr-total" data-city="<?php echo esc_attr(strtolower($p_city_simple)); ?>" style="background:#fff;border-radius:10px;padding:15px;box-shadow:var(--shadow-sm);border:1px solid #e8eef5;transition:var(--transition);display:flex;flex-direction:column;">
                                     <a href="<?php echo esc_url($product_url); ?>" style="text-decoration:none;color:inherit;flex:1;display:block;">
                                         <h4 style="font-size:15px;font-weight:700;color:var(--secondary);margin:0 0 6px;line-height:1.3;"><?php echo esc_html($product->title); ?></h4>
@@ -318,11 +319,12 @@ get_header();
                                     </div>
                                 </div>
                                 <?php
-                            endforeach;
-                        else:
-                        ?>
+    endforeach;
+else:
+?>
                             <div style="font-size:13px;color:#999;text-align:center;padding:20px;border:1px dashed #ccc;border-radius:8px;">No products available.</div>
-                        <?php endif; ?>
+                        <?php
+endif; ?>
                     </div>
 
                     <!-- Client-side filter script -->
@@ -399,7 +401,7 @@ if ($package_query->have_posts()):
                                         </div>
 
                                         <!-- Title -->
-                                        <div class="destination-text-box" style="padding:14px 14px 6px;">
+                                        <div class="destination-text-box">
                                             <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
                                         </div>
 
@@ -436,11 +438,9 @@ if ($package_query->have_posts()):
                                         </div>
 
                                         <!-- CTA -->
-                                        <div class="booknow bkus-hi8">
-                                            <a href="<?php the_permalink(); ?>" class="df-button2"
-                                                style="flex:1;justify-content:center;font-size:13px;">Details</a>
-                                            <a href="<?php echo esc_url(home_url('/cab-booking')); ?>" class="df-button1"
-                                                style="flex:1;justify-content:center;font-size:13px;">Book Now</a>
+                                        <div class="book-buttons">
+                                            <a href="<?php the_permalink(); ?>" class="df-button2">Details</a>
+                                            <a href="<?php echo esc_url(home_url('/cab-booking')); ?>" class="df-button1">Book Now</a>
                                         </div>
                                     </div>
                                 </div>
@@ -508,7 +508,7 @@ if ($car_query->have_posts()):
         $features_raw = get_post_meta(get_the_ID(), 'features', true);
         $features_arr = $features_raw ? array_slice(explode(',', $features_raw), 0, 3) : [];
 ?>
-                        <div class="col-md-3 col-sm-6 col-xs-12">
+                        <div class="col-md-4 col-sm-6 col-xs-12">
                             <div class="destination-thumb thumb gap rnt-gap">
                                 <!-- Image area -->
                                 <div class="zoomeffects">
@@ -530,9 +530,8 @@ if ($car_query->have_posts()):
 
                                 <!-- Car name badge -->
                                 <div class="mc-car-name">
-                                    <div class="myles-12">
-                                        <p class="carname">
-                                            <span><?php the_title(); ?></span>
+                                    <p class="carname">
+                                        <span><?php the_title(); ?></span>
                                             <span class="tx">
                                                 <?php if ($ac_status): ?>
                                                     <i class="fa fa-snowflake"></i> <?php echo esc_html($ac_status); ?>
@@ -579,13 +578,9 @@ if ($car_query->have_posts()):
 
                                 <!-- CTA -->
                                 <div class="mc-feature" style="margin-top:auto;">
-                                    <div class="myles-12">
-                                        <div class="booknow1" style="display:flex;gap:8px;">
-                                            <a href="<?php the_permalink(); ?>" class="df-button1"
-                                                style="flex:1;justify-content:center;">Details</a>
-                                            <a href="<?php echo esc_url(home_url('/car-rentals')); ?>" class="df-button3"
-                                                style="flex:1;justify-content:center;">Book Car</a>
-                                        </div>
+                                    <div class="book-buttons">
+                                        <a href="<?php the_permalink(); ?>" class="df-button2">Details</a>
+                                        <a href="<?php echo esc_url(home_url('/car-rentals')); ?>" class="df-button1">Book Now</a>
                                     </div>
                                 </div>
                             </div>

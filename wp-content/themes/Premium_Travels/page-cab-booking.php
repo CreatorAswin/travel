@@ -95,7 +95,7 @@ if (isset($service_map[$service_id])) {
                                 </div>
                             </div>
 
-                            <?php if ($service_id !== '24'):  // Not Local Trip ?>
+                            <?php if ($service_id !== '24'): // Not Local Trip ?>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Drop Location *</label>
@@ -106,7 +106,8 @@ if (isset($service_map[$service_id])) {
                                         </select>
                                     </div>
                                 </div>
-                            <?php endif; ?>
+                            <?php
+endif; ?>
                         </div>
 
                         <div class="row">
@@ -124,7 +125,7 @@ if (isset($service_map[$service_id])) {
                             </div>
                         </div>
 
-                        <?php if ($service_id === '160'):  // Round Trip ?>
+                        <?php if ($service_id === '160'): // Round Trip ?>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -139,9 +140,10 @@ if (isset($service_map[$service_id])) {
                                     </div>
                                 </div>
                             </div>
-                        <?php endif; ?>
+                        <?php
+endif; ?>
 
-                        <?php if ($service_id === '24'):  // Local Trip ?>
+                        <?php if ($service_id === '24'): // Local Trip ?>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -155,7 +157,8 @@ if (isset($service_map[$service_id])) {
                                     </div>
                                 </div>
                             </div>
-                        <?php endif; ?>
+                        <?php
+endif; ?>
 
                         <hr>
 
@@ -168,13 +171,13 @@ if (isset($service_map[$service_id])) {
                                     <select name="car_type" class="form-control selectpicker" required>
                                         <option value="">Choose Vehicle</option>
                                         <?php
-                                        $car_args = array('post_type' => 'car_type', 'posts_per_page' => -1);
-                                        $cars = get_posts($car_args);
-                                        foreach ($cars as $car) {
-                                            $capacity = get_post_meta($car->ID, 'capacity', true);
-                                            echo '<option value="' . esc_attr($car->post_title) . '">' . esc_html($car->post_title) . ' (' . esc_html($capacity) . ')</option>';
-                                        }
-                                        ?>
+$car_args = array('post_type' => 'car_type', 'posts_per_page' => -1);
+$cars = get_posts($car_args);
+foreach ($cars as $car) {
+    $capacity = get_post_meta($car->ID, 'capacity', true);
+    echo '<option value="' . esc_attr($car->post_title) . '">' . esc_html($car->post_title) . ' (' . esc_html($capacity) . ')</option>';
+}
+?>
                                     </select>
                                 </div>
                             </div>

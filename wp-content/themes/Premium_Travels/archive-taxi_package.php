@@ -29,12 +29,12 @@ get_header();
                                 <select name="service_type" class="form-control selectpicker" data-live-search="true">
                                     <option value="">All Service Types</option>
                                     <?php
-                                    $service_types = get_terms(array('taxonomy' => 'service_type', 'hide_empty' => false));
-                                    foreach ($service_types as $term) {
-                                        $selected = (isset($_GET['service_type']) && $_GET['service_type'] == $term->slug) ? 'selected' : '';
-                                        echo '<option value="' . esc_attr($term->slug) . '" ' . $selected . '>' . esc_html($term->name) . '</option>';
-                                    }
-                                    ?>
+$service_types = get_terms(array('taxonomy' => 'service_type', 'hide_empty' => false));
+foreach ($service_types as $term) {
+    $selected = (isset($_GET['service_type']) && $_GET['service_type'] == $term->slug) ? 'selected' : '';
+    echo '<option value="' . esc_attr($term->slug) . '" ' . $selected . '>' . esc_html($term->name) . '</option>';
+}
+?>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -46,11 +46,11 @@ get_header();
                             <div class="col-md-3">
                                 <select name="orderby" class="form-control">
                                     <option value="">Sort By</option>
-                                    <option value="price_low" <?php echo (isset($_GET['orderby']) && $_GET['orderby'] == 'price_low') ? 'selected' : ''; ?>>Price: Low to High
+                                    <option value="price_low" <?php echo(isset($_GET['orderby']) && $_GET['orderby'] == 'price_low') ? 'selected' : ''; ?>>Price: Low to High
                                     </option>
-                                    <option value="price_high" <?php echo (isset($_GET['orderby']) && $_GET['orderby'] == 'price_high') ? 'selected' : ''; ?>>Price: High to Low
+                                    <option value="price_high" <?php echo(isset($_GET['orderby']) && $_GET['orderby'] == 'price_high') ? 'selected' : ''; ?>>Price: High to Low
                                     </option>
-                                    <option value="title" <?php echo (isset($_GET['orderby']) && $_GET['orderby'] == 'title') ? 'selected' : ''; ?>>Name: A-Z</option>
+                                    <option value="title" <?php echo(isset($_GET['orderby']) && $_GET['orderby'] == 'title') ? 'selected' : ''; ?>>Name: A-Z</option>
                                 </select>
                             </div>
                             <div class="col-md-3">
@@ -63,82 +63,83 @@ get_header();
         </div>
 
         <!-- Packages Grid -->
-        <div class="row">
+        <div class="row equal-height">
             <?php
-            // Build query args
-            $paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
-            $args = array(
-                'post_type' => 'taxi_package',
-                'posts_per_page' => 12,
-                'paged' => $paged,
-            );
+// Build query args
+$paged = (get_query_var('paged')) ? get_query_var('paged') : 1;
+$args = array(
+    'post_type' => 'taxi_package',
+    'posts_per_page' => 12,
+    'paged' => $paged,
+);
 
-            // Filter by service type
-            if (isset($_GET['service_type']) && !empty($_GET['service_type'])) {
-                $args['tax_query'] = array(
-                    array(
-                        'taxonomy' => 'service_type',
-                        'field' => 'slug',
-                        'terms' => sanitize_text_field($_GET['service_type']),
-                    ),
-                );
-            }
+// Filter by service type
+if (isset($_GET['service_type']) && !empty($_GET['service_type'])) {
+    $args['tax_query'] = array(
+            array(
+            'taxonomy' => 'service_type',
+            'field' => 'slug',
+            'terms' => sanitize_text_field($_GET['service_type']),
+        ),
+    );
+}
 
-            // Filter by pickup city
-            if (isset($_GET['pickup_city']) && !empty($_GET['pickup_city'])) {
-                $args['meta_query'] = array(
-                    array(
-                        'key' => 'pickup_location',
-                        'value' => sanitize_text_field($_GET['pickup_city']),
-                        'compare' => 'LIKE',
-                    ),
-                );
-            }
+// Filter by pickup city
+if (isset($_GET['pickup_city']) && !empty($_GET['pickup_city'])) {
+    $args['meta_query'] = array(
+            array(
+            'key' => 'pickup_location',
+            'value' => sanitize_text_field($_GET['pickup_city']),
+            'compare' => 'LIKE',
+        ),
+    );
+}
 
-            // Sort by price or title
-            if (isset($_GET['orderby']) && !empty($_GET['orderby'])) {
-                switch ($_GET['orderby']) {
-                    case 'price_low':
-                        $args['meta_key'] = 'price';
-                        $args['orderby'] = 'meta_value_num';
-                        $args['order'] = 'ASC';
-                        break;
-                    case 'price_high':
-                        $args['meta_key'] = 'price';
-                        $args['orderby'] = 'meta_value_num';
-                        $args['order'] = 'DESC';
-                        break;
-                    case 'title':
-                        $args['orderby'] = 'title';
-                        $args['order'] = 'ASC';
-                        break;
-                }
-            }
+// Sort by price or title
+if (isset($_GET['orderby']) && !empty($_GET['orderby'])) {
+    switch ($_GET['orderby']) {
+        case 'price_low':
+            $args['meta_key'] = 'price';
+            $args['orderby'] = 'meta_value_num';
+            $args['order'] = 'ASC';
+            break;
+        case 'price_high':
+            $args['meta_key'] = 'price';
+            $args['orderby'] = 'meta_value_num';
+            $args['order'] = 'DESC';
+            break;
+        case 'title':
+            $args['orderby'] = 'title';
+            $args['order'] = 'ASC';
+            break;
+    }
+}
 
-            $package_query = new WP_Query($args);
+$package_query = new WP_Query($args);
 
-            if ($package_query->have_posts()):
-                while ($package_query->have_posts()):
-                    $package_query->the_post();
-                    $price = get_post_meta(get_the_ID(), 'price', true) ?: 'Contact for Price';
-                    $pickup_loc = get_post_meta(get_the_ID(), 'pickup_location', true) ?: 'Bhubaneswar, Odisha';
-                    $person_count = get_post_meta(get_the_ID(), 'person_count', true) ?: '4';
-                    ?>
+if ($package_query->have_posts()):
+    while ($package_query->have_posts()):
+        $package_query->the_post();
+        $price = get_post_meta(get_the_ID(), 'price', true) ?: 'Contact for Price';
+        $pickup_loc = get_post_meta(get_the_ID(), 'pickup_location', true) ?: 'Bhubaneswar, Odisha';
+        $person_count = get_post_meta(get_the_ID(), 'person_count', true) ?: '4';
+?>
                     <div class="col-md-3 col-sm-6 col-xs-12">
                         <div class="destination-thumb thumb gap tr-total">
                             <div class="zoomeffects">
                                 <div class="zoomEffect_1 new-effect">
                                     <a href="<?php the_permalink(); ?>">
                                         <?php if (has_post_thumbnail()) {
-                                            the_post_thumbnail('medium', array('alt' => get_the_title()));
-                                        } else {
-                                            echo '<img src="https://www.patratravels.com/admin/image/tourimage/tourpkgimage_51.jpg" alt="Default Image" />';
-                                        } ?>
+            the_post_thumbnail('medium', array('alt' => get_the_title()));
+        }
+        else {
+            echo '<img src="https://www.patratravels.com/admin/image/tourimage/tourpkgimage_51.jpg" alt="Default Image" />';
+        }?>
                                     </a>
                                 </div>
                             </div>
                             <div class="col-md-12 col-sm-12 col-xs-12" style="padding:0;">
-                                <div class="destination-text-box pkg-height">
+                                <div class="destination-text-box">
                                     <a href="<?php the_permalink(); ?>">
                                         <?php the_title(); ?>
                                     </a>
@@ -158,17 +159,18 @@ get_header();
                                 </div>
                             </div>
                             <div class="clearfix"></div>
-                            <div class="booknow bkus-hi8">
-                                <a href="<?php the_permalink(); ?>" class="df-button2">View Details</a>
+                            <div class="book-buttons">
+                                <a href="<?php the_permalink(); ?>" class="df-button2">Details</a>
+                                <a href="<?php the_permalink(); ?>" class="df-button1">Book Now</a>
                             </div>
                         </div>
                     </div>
                     <?php
-                endwhile;
-            else:
-                echo '<div class="col-md-12"><p class="text-center">No packages found. Please try different filters.</p></div>';
-            endif;
-            ?>
+    endwhile;
+else:
+    echo '<div class="col-md-12"><p class="text-center">No packages found. Please try different filters.</p></div>';
+endif;
+?>
         </div>
 
         <!-- Pagination -->
@@ -177,17 +179,18 @@ get_header();
                 <div class="col-md-12">
                     <div class="pagination-wrapper text-center" style="margin-top: 30px;">
                         <?php
-                        echo paginate_links(array(
-                            'total' => $package_query->max_num_pages,
-                            'current' => $paged,
-                            'prev_text' => '&laquo; Previous',
-                            'next_text' => 'Next &raquo;',
-                        ));
-                        ?>
+    echo paginate_links(array(
+        'total' => $package_query->max_num_pages,
+        'current' => $paged,
+        'prev_text' => '&laquo; Previous',
+        'next_text' => 'Next &raquo;',
+    ));
+?>
                     </div>
                 </div>
             </div>
-        <?php endif; ?>
+        <?php
+endif; ?>
 
         <?php wp_reset_postdata(); ?>
     </div>

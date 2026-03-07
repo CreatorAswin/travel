@@ -31,7 +31,7 @@ function pt_taxi_package_meta_box_callback($post)
     $exclusions = get_post_meta($post->ID, 'exclusions', true);
     $distance_km = get_post_meta($post->ID, 'distance_km', true);
     $nights = get_post_meta($post->ID, 'nights', true);
-    ?>
+?>
     <table class="pt-meta-table">
         <tr>
             <th><label for="pt_price">Package Price (₹)</label></th>
@@ -75,6 +75,34 @@ function pt_taxi_package_meta_box_callback($post)
                     placeholder="Hotel, Food, Entry Tickets..."><?php echo esc_textarea($exclusions); ?></textarea></td>
         </tr>
     </table>
+
+    <!-- Gallery Images -->
+    <h4 style="margin: 20px 0 10px; font-size: 14px; font-weight: 600; color: #333;">📸 Gallery Images</h4>
+    <p style="color: #666; font-size: 12px; margin-bottom: 10px;">Add multiple images for the package gallery. These will show as thumbnails on the package detail page.</p>
+    <?php
+    $gallery_ids = get_post_meta($post->ID, 'gallery_images', true);
+?>
+    <div id="pt_gallery_container" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+        <?php
+    if ($gallery_ids) {
+        $ids = explode(',', $gallery_ids);
+        foreach ($ids as $img_id) {
+            $img_id = intval(trim($img_id));
+            if ($img_id) {
+                $img_url = wp_get_attachment_image_url($img_id, 'thumbnail');
+                if ($img_url) {
+                    echo '<div class="pt-gallery-thumb" data-id="' . $img_id . '" style="position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:2px solid #ddd;">';
+                    echo '<img src="' . esc_url($img_url) . '" style="width:100%;height:100%;object-fit:cover;">';
+                    echo '<button type="button" class="pt-gallery-remove" style="position:absolute;top:2px;right:2px;background:#e74c3c;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">&times;</button>';
+                    echo '</div>';
+                }
+            }
+        }
+    }
+?>
+    </div>
+    <input type="hidden" id="pt_gallery_ids" name="pt_gallery_ids" value="<?php echo esc_attr($gallery_ids); ?>">
+    <button type="button" id="pt_gallery_add" class="button" style="margin-bottom: 10px;">Add Gallery Images</button>
     <?php
 }
 
@@ -102,6 +130,11 @@ function pt_taxi_package_save($post_id)
         if (isset($_POST[$input])) {
             update_post_meta($post_id, $meta_key, sanitize_textarea_field($_POST[$input]));
         }
+    }
+
+    // Save gallery images
+    if (isset($_POST['pt_gallery_ids'])) {
+        update_post_meta($post_id, 'gallery_images', sanitize_text_field($_POST['pt_gallery_ids']));
     }
 }
 add_action('save_post_taxi_package', 'pt_taxi_package_save');
@@ -132,7 +165,7 @@ function pt_car_type_meta_box_callback($post)
     $features = get_post_meta($post->ID, 'features', true);
     $luggage = get_post_meta($post->ID, 'luggage', true);
     $fuel_type = get_post_meta($post->ID, 'fuel_type', true);
-    ?>
+?>
     <table class="pt-meta-table">
         <tr>
             <th><label for="pt_capacity">Seating Capacity</label></th>
@@ -233,7 +266,7 @@ function pt_holiday_package_meta_box_callback($post)
     $exclusions = get_post_meta($post->ID, 'exclusions', true);
     $highlights = get_post_meta($post->ID, 'highlights', true);
     $hotel_stars = get_post_meta($post->ID, 'hotel_stars', true);
-    ?>
+?>
     <table class="pt-meta-table">
         <tr>
             <th><label for="hp_price">Package Price (₹)</label></th>
@@ -339,7 +372,7 @@ function pt_testimonial_meta_box_callback($post)
     $location = get_post_meta($post->ID, 'location', true);
     $trip_type = get_post_meta($post->ID, 'trip_type', true);
     $photo_url = get_post_meta($post->ID, 'photo_url', true);
-    ?>
+?>
     <table class="pt-meta-table">
         <tr>
             <th><label for="testi_rating">Star Rating (1–5)</label></th>
@@ -350,7 +383,8 @@ function pt_testimonial_meta_box_callback($post)
                             <?php echo $i; ?> Star
                             <?php echo $i > 1 ? 's' : ''; ?>
                         </option>
-                    <?php endfor; ?>
+                    <?php
+    endfor; ?>
                 </select>
             </td>
         </tr>
@@ -438,7 +472,7 @@ function pt_special_offer_meta_box_callback($post)
     $applicable = get_post_meta($post->ID, 'applicable_for', true);
     $coupon_code = get_post_meta($post->ID, 'coupon_code', true);
     $min_booking = get_post_meta($post->ID, 'minimum_booking', true);
-    ?>
+?>
     <table class="pt-meta-table">
         <tr>
             <th><label for="offer_discount">Discount Percentage (%)</label></th>
@@ -530,7 +564,7 @@ function pt_route_meta_box_callback($post)
     $price_per_km = get_post_meta($post->ID, 'price_per_km', true);
     $travel_time = get_post_meta($post->ID, 'travel_time', true);
     $route_type = get_post_meta($post->ID, 'route_type', true);
-    ?>
+?>
     <table class="pt-meta-table">
         <tr>
             <th><label for="route_from">From City</label></th>
@@ -623,7 +657,7 @@ function pt_location_meta_box_callback($post)
     $airport = get_post_meta($post->ID, 'airport', true);
     $coordinates = get_post_meta($post->ID, 'coordinates', true);
     $is_active = get_post_meta($post->ID, 'is_active', true);
-    ?>
+?>
     <table class="pt-meta-table">
         <tr>
             <th><label for="loc_state">State</label></th>
@@ -700,7 +734,7 @@ function pt_product_meta_box_callback($post)
     $inventory_qty = get_post_meta($post->ID, 'inventory_qty', true);
     $sku = get_post_meta($post->ID, 'sku', true);
     $weight = get_post_meta($post->ID, 'weight', true);
-    ?>
+?>
     <table class="pt-meta-table">
         <tr>
             <th><label for="product_price_regular">Regular Price (₹)</label></th>
@@ -718,15 +752,15 @@ function pt_product_meta_box_callback($post)
                 <select id="product_location" name="product_location">
                     <option value="">-- Select Location --</option>
                     <?php
-                    $locations = get_posts([
-                        'post_type' => 'location',
-                        'numberposts' => -1,
-                        'post_status' => 'publish'
-                    ]);
-                    foreach ($locations as $loc) {
-                        echo '<option value="' . $loc->ID . '" ' . selected($location, $loc->ID, false) . '>' . esc_html($loc->post_title) . '</option>';
-                    }
-                    ?>
+    $locations = get_posts([
+        'post_type' => 'location',
+        'numberposts' => -1,
+        'post_status' => 'publish'
+    ]);
+    foreach ($locations as $loc) {
+        echo '<option value="' . $loc->ID . '" ' . selected($location, $loc->ID, false) . '>' . esc_html($loc->post_title) . '</option>';
+    }
+?>
                 </select>
             </td>
         </tr>
@@ -762,6 +796,34 @@ function pt_product_meta_box_callback($post)
                     placeholder="Brief product description..."><?php echo esc_textarea($short_description); ?></textarea></td>
         </tr>
     </table>
+
+    <!-- Product Gallery Images -->
+    <h4 style="margin: 20px 0 10px; font-size: 14px; font-weight: 600; color: #333;">📸 Product Gallery Images</h4>
+    <p style="color: #666; font-size: 12px; margin-bottom: 10px;">Add multiple images for the product gallery. These will show on the product detail page.</p>
+    <?php
+    $product_gallery_ids = get_post_meta($post->ID, 'product_gallery_images', true);
+?>
+    <div id="pt_product_gallery_container" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+        <?php
+    if ($product_gallery_ids) {
+        $ids = explode(',', $product_gallery_ids);
+        foreach ($ids as $img_id) {
+            $img_id = intval(trim($img_id));
+            if ($img_id) {
+                $img_url = wp_get_attachment_image_url($img_id, 'thumbnail');
+                if ($img_url) {
+                    echo '<div class="pt-product-gallery-thumb" data-id="' . $img_id . '" style="position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:2px solid #ddd;">';
+                    echo '<img src="' . esc_url($img_url) . '" style="width:100%;height:100%;object-fit:cover;">';
+                    echo '<button type="button" class="pt-product-gallery-remove" style="position:absolute;top:2px;right:2px;background:#e74c3c;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">&times;</button>';
+                    echo '</div>';
+                }
+            }
+        }
+    }
+?>
+    </div>
+    <input type="hidden" id="pt_product_gallery_ids" name="pt_product_gallery_ids" value="<?php echo esc_attr($product_gallery_ids); ?>">
+    <button type="button" id="pt_product_gallery_add" class="button" style="margin-bottom: 10px;">Add Gallery Images</button>
     <?php
 }
 
@@ -775,15 +837,15 @@ function pt_product_save($post_id)
         return;
 
     global $wpdb;
-    
+
     // Check if this product already exists in our custom table
     $existing_id = $wpdb->get_var(
         $wpdb->prepare(
-            "SELECT id FROM {$wpdb->prefix}pt_products WHERE title = %s",
-            get_the_title($post_id)
-        )
+        "SELECT id FROM {$wpdb->prefix}pt_products WHERE title = %s",
+        get_the_title($post_id)
+    )
     );
-    
+
     // Prepare data for custom table
     $title = get_the_title($post_id);
     $data = array(
@@ -802,12 +864,12 @@ function pt_product_save($post_id)
         'created_at' => current_time('mysql'),
         'updated_at' => current_time('mysql')
     );
-    
+
     // Calculate discount percentage if sale price exists
     if ($data['price_sale'] && $data['price_regular'] > 0) {
         $data['discount_percentage'] = (($data['price_regular'] - $data['price_sale']) / $data['price_regular']) * 100;
     }
-    
+
     if ($existing_id) {
         // Update existing record
         $data['updated_at'] = current_time('mysql');
@@ -816,14 +878,15 @@ function pt_product_save($post_id)
             $data,
             array('id' => $existing_id)
         );
-    } else {
+    }
+    else {
         // Insert new record
         $result = $wpdb->insert(
             $wpdb->prefix . 'pt_products',
             $data
         );
     }
-    
+
     // Also save to WordPress post meta for backward compatibility
     $meta_fields = [
         'product_price_regular' => 'price_regular',
@@ -842,6 +905,10 @@ function pt_product_save($post_id)
             update_post_meta($post_id, $meta_key, $value);
         }
     }
+    // Save product gallery images
+    if (isset($_POST['pt_product_gallery_ids'])) {
+        update_post_meta($post_id, 'product_gallery_images', sanitize_text_field($_POST['pt_product_gallery_ids']));
+    }
 }
 add_action('save_post_pt_product', 'pt_product_save');
 
@@ -852,29 +919,30 @@ add_action('save_post_pt_product', 'pt_product_save');
 /**
  * Migrate existing pt_product CPT data to custom database table
  */
-function pt_migrate_products_to_database() {
+function pt_migrate_products_to_database()
+{
     global $wpdb;
-    
+
     // Get all existing pt_product posts
     $args = array(
         'post_type' => 'pt_product',
         'posts_per_page' => -1,
         'post_status' => 'publish'
     );
-    
+
     $products = get_posts($args);
     $migrated = 0;
     $skipped = 0;
-    
+
     foreach ($products as $product) {
         // Check if already exists in custom table
         $existing = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT id FROM {$wpdb->prefix}pt_products WHERE title = %s",
-                $product->post_title
-            )
+            "SELECT id FROM {$wpdb->prefix}pt_products WHERE title = %s",
+            $product->post_title
+        )
         );
-        
+
         if (!$existing) {
             // Get post meta data
             $price_regular = get_post_meta($product->ID, 'price_regular', true);
@@ -885,7 +953,7 @@ function pt_migrate_products_to_database() {
             $inventory_qty = get_post_meta($product->ID, 'inventory_qty', true);
             $weight = get_post_meta($product->ID, 'weight', true);
             $short_description = get_post_meta($product->ID, 'short_description', true);
-            
+
             // Prepare data
             $data = array(
                 'title' => $product->post_title,
@@ -902,26 +970,27 @@ function pt_migrate_products_to_database() {
                 'created_at' => $product->post_date,
                 'updated_at' => current_time('mysql')
             );
-            
+
             // Calculate discount percentage
             if ($data['price_sale'] && $data['price_regular'] > 0) {
                 $data['discount_percentage'] = (($data['price_regular'] - $data['price_sale']) / $data['price_regular']) * 100;
             }
-            
+
             // Insert into custom table
             $result = $wpdb->insert(
                 $wpdb->prefix . 'pt_products',
                 $data
             );
-            
+
             if ($result) {
                 $migrated++;
             }
-        } else {
+        }
+        else {
             $skipped++;
         }
     }
-    
+
     return array(
         'migrated' => $migrated,
         'skipped' => $skipped,
@@ -932,18 +1001,19 @@ function pt_migrate_products_to_database() {
 // Add admin notice to trigger migration
 add_action('admin_notices', 'pt_products_migration_notice');
 
-function pt_products_migration_notice() {
+function pt_products_migration_notice()
+{
     global $pagenow, $wpdb;
-    
+
     // Only show on products admin page
     if ($pagenow !== 'edit.php' || !isset($_GET['post_type']) || $_GET['post_type'] !== 'pt_product') {
         return;
     }
-    
+
     // Check if we have products in CPT but not in custom table
     $cpt_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'pt_product' AND post_status = 'publish'");
     $db_count = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}pt_products WHERE is_active = 1");
-    
+
     if ($cpt_count > 0 && $db_count == 0) {
         echo '<div class="notice notice-warning">';
         echo '<p><strong>Product Data Migration Needed:</strong> You have ' . $cpt_count . ' products in WordPress that need to be migrated to the database.</p>';
@@ -955,19 +1025,20 @@ function pt_products_migration_notice() {
 // Handle migration action
 add_action('admin_post_pt_migrate_products', 'pt_handle_products_migration');
 
-function pt_handle_products_migration() {
+function pt_handle_products_migration()
+{
     if (!current_user_can('manage_options')) {
         wp_die('You do not have permission to perform this action.');
     }
-    
+
     $result = pt_migrate_products_to_database();
-    
+
     // Redirect back with message
     $redirect_url = admin_url('edit.php?post_type=pt_product');
     if ($result['migrated'] > 0) {
         $redirect_url = add_query_arg('migration_success', $result['migrated'], $redirect_url);
     }
-    
+
     wp_redirect($redirect_url);
     exit;
 }
@@ -975,13 +1046,14 @@ function pt_handle_products_migration() {
 // Show success message
 add_action('admin_notices', 'pt_products_migration_success');
 
-function pt_products_migration_success() {
+function pt_products_migration_success()
+{
     global $pagenow;
-    
+
     if ($pagenow !== 'edit.php' || !isset($_GET['post_type']) || $_GET['post_type'] !== 'pt_product') {
         return;
     }
-    
+
     if (isset($_GET['migration_success'])) {
         $count = intval($_GET['migration_success']);
         echo '<div class="notice notice-success is-dismissible">';
@@ -1000,6 +1072,92 @@ function pt_admin_meta_box_styles()
     $cpts = ['taxi_package', 'car_type', 'holiday_package', 'testimonial', 'special_offer', 'route', 'location', 'pt_product'];
     if ($screen && in_array($screen->post_type, $cpts)) {
         wp_enqueue_style('pt-meta-box-style', get_template_directory_uri() . '/style-custom.css');
+        wp_enqueue_media();
     }
 }
 add_action('admin_enqueue_scripts', 'pt_admin_meta_box_styles');
+
+// ============================================================
+// 12. Gallery Image Picker JavaScript
+// ============================================================
+function pt_gallery_admin_js()
+{
+    $screen = get_current_screen();
+    if (!$screen || !in_array($screen->post_type, ['taxi_package', 'pt_product']))
+        return;
+?>
+    <script>
+    jQuery(document).ready(function($) {
+        // --- TAXI PACKAGE GALLERY ---
+        function ptUpdateGalleryIds(container, input) {
+            var ids = [];
+            container.find('[data-id]').each(function() {
+                ids.push($(this).data('id'));
+            });
+            input.val(ids.join(','));
+        }
+
+        // Taxi Package Add
+        $('#pt_gallery_add').on('click', function(e) {
+            e.preventDefault();
+            var frame = wp.media({
+                title: 'Select Gallery Images',
+                button: { text: 'Add to Gallery' },
+                multiple: true
+            });
+            frame.on('select', function() {
+                var attachments = frame.state().get('selection').toJSON();
+                var container = $('#pt_gallery_container');
+                var input = $('#pt_gallery_ids');
+                attachments.forEach(function(att) {
+                    var thumbUrl = att.sizes && att.sizes.thumbnail ? att.sizes.thumbnail.url : att.url;
+                    var html = '<div class="pt-gallery-thumb" data-id="' + att.id + '" style="position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:2px solid #ddd;">';
+                    html += '<img src="' + thumbUrl + '" style="width:100%;height:100%;object-fit:cover;">';
+                    html += '<button type="button" class="pt-gallery-remove" style="position:absolute;top:2px;right:2px;background:#e74c3c;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">&times;</button>';
+                    html += '</div>';
+                    container.append(html);
+                });
+                ptUpdateGalleryIds(container, input);
+            });
+            frame.open();
+        });
+
+        $(document).on('click', '.pt-gallery-remove', function() {
+            $(this).closest('.pt-gallery-thumb').remove();
+            ptUpdateGalleryIds($('#pt_gallery_container'), $('#pt_gallery_ids'));
+        });
+
+        // --- PRODUCT GALLERY ---
+        $('#pt_product_gallery_add').on('click', function(e) {
+            e.preventDefault();
+            var frame = wp.media({
+                title: 'Select Product Gallery Images',
+                button: { text: 'Add to Gallery' },
+                multiple: true
+            });
+            frame.on('select', function() {
+                var attachments = frame.state().get('selection').toJSON();
+                var container = $('#pt_product_gallery_container');
+                var input = $('#pt_product_gallery_ids');
+                attachments.forEach(function(att) {
+                    var thumbUrl = att.sizes && att.sizes.thumbnail ? att.sizes.thumbnail.url : att.url;
+                    var html = '<div class="pt-product-gallery-thumb" data-id="' + att.id + '" style="position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:2px solid #ddd;">';
+                    html += '<img src="' + thumbUrl + '" style="width:100%;height:100%;object-fit:cover;">';
+                    html += '<button type="button" class="pt-product-gallery-remove" style="position:absolute;top:2px;right:2px;background:#e74c3c;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;">&times;</button>';
+                    html += '</div>';
+                    container.append(html);
+                });
+                ptUpdateGalleryIds(container, input);
+            });
+            frame.open();
+        });
+
+        $(document).on('click', '.pt-product-gallery-remove', function() {
+            $(this).closest('.pt-product-gallery-thumb').remove();
+            ptUpdateGalleryIds($('#pt_product_gallery_container'), $('#pt_product_gallery_ids'));
+        });
+    });
+    </script>
+    <?php
+}
+add_action('admin_footer', 'pt_gallery_admin_js');

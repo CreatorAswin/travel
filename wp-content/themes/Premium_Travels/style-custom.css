@@ -59,6 +59,23 @@ body {
     padding: 30px 0 !important;
 }
 
+/* Equal Height Grid Utility */
+.equal-height {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.equal-height>[class*="col-"] {
+    display: flex;
+    flex-direction: column;
+}
+
+.equal-height>[class*="col-"]>* {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 .section-heading {
     margin-bottom: 25px !important;
 }
@@ -815,18 +832,19 @@ body {
 
 /* Card text areas */
 .destination-text-box {
-    padding: 14px 14px 4px;
+    padding: 16px 18px 6px;
     flex: 1;
 }
 
 .destination-text-box a {
     color: var(--secondary) !important;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     text-decoration: none !important;
     line-height: 1.4;
     display: block;
     transition: var(--transition);
+    letter-spacing: -0.2px;
 }
 
 .destination-text-box a:hover {
@@ -834,9 +852,9 @@ body {
 }
 
 .destination-text {
-    padding: 2px 14px;
-    font-size: 12px;
-    color: var(--text-light);
+    padding: 4px 18px;
+    font-size: 13px;
+    color: var(--text-mid);
 }
 
 .destination-text small {
@@ -850,10 +868,14 @@ body {
 }
 
 .destination-text1 {
-    padding: 6px 14px;
-    font-size: 20px;
+    padding: 8px 18px;
+    font-size: 24px;
     font-weight: 800;
     color: var(--primary);
+    line-height: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
 }
 
 .desti-small {
@@ -862,13 +884,109 @@ body {
     color: var(--text-light);
 }
 
-.booknow.bkus-hi8 {
+.booknow.bkus-hi8,
+.book-buttons {
     padding: 12px 14px;
     margin-top: auto;
     border-top: 1px solid #f0f4f8;
     display: flex;
+    gap: 12px;
+}
+
+.book-buttons a {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+    display: flex;
     align-items: center;
-    gap: 8px;
+}
+
+/* Global Button Styles */
+.df-button1,
+.df-button2,
+.df-button3 {
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+}
+
+.df-button1 {
+    background: var(--primary) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 15px rgba(248, 88, 14, 0.25);
+}
+
+.df-button1:hover {
+    background: var(--primary-dk) !important;
+    transform: translateY(-2px);
+}
+
+.df-button2 {
+    background: #f5f5f5 !important;
+    color: var(--primary) !important;
+}
+
+.df-button2:hover {
+    background: #eeeeee !important;
+    transform: translateY(-2px);
+}
+
+.df-button3 {
+    background: var(--secondary) !important;
+    color: #fff !important;
+}
+
+.df-button3:hover {
+    background: var(--secondary-lt) !important;
+    transform: translateY(-2px);
+}
+
+/* Modal and Sidebar specific button adjustments */
+.sidebar-booking-form button.df-button1 {
+    width: 100%;
+}
+
+/* Force absolute equality for buttons in cards */
+.booknow.bkus-hi8 .df-button1,
+.booknow.bkus-hi8 .df-button2,
+.booknow1 .df-button1,
+.booknow1 .df-button3 {
+    flex: 1 !important;
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 13px !important;
+    padding: 10px 5px !important;
+    min-height: 42px !important;
+    box-sizing: border-box !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    border-radius: 6px !important;
+    text-decoration: none !important;
+    border: none !important;
+    /* Remove borders to avoid misalignment */
+}
+
+/* Ensure consistent solid colors to avoid "outline" style differences */
+.booknow.bkus-hi8 .df-button2,
+.booknow1 .df-button1 {
+    background: #f1f1f1 !important;
+    color: #333 !important;
+}
+
+.booknow.bkus-hi8 .df-button1,
+.booknow1 .df-button3 {
+    background: var(--primary) !important;
+    color: #fff !important;
 }
 
 /* ----------------------------------------------------------
@@ -921,17 +1039,18 @@ body {
 /* Car name badge */
 .mc-car-name {
     background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-lt) 100%);
-    padding: 12px 16px;
+    padding: 14px 18px;
 }
 
 .carname {
     margin: 0;
     color: #fff;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
+    letter-spacing: -0.2px;
 }
 
 .carname .tx {
@@ -948,14 +1067,15 @@ body {
 }
 
 .car-price-row {
-    padding: 10px 16px 4px;
+    padding: 12px 18px 6px;
     font-size: 13px;
     color: var(--text-mid);
 }
 
 .car-price-row strong {
     color: var(--primary);
-    font-size: 18px;
+    font-size: 22px;
+    font-weight: 800;
 }
 
 .mc-feature {
@@ -1835,8 +1955,8 @@ footer .container,
 
 /* Each testimonial card */
 .testi-card {
-    flex: 0 0 300px;
-    max-width: 300px;
+    flex: 0 0 380px;
+    max-width: 380px;
 }
 
 .testi-card .main-test-sec {
@@ -2055,7 +2175,7 @@ footer .container,
     }
 
     .testi-card {
-        flex: 0 0 260px;
-        max-width: 260px;
+        flex: 0 0 320px;
+        max-width: 320px;
     }
 }
