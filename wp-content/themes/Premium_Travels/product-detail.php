@@ -52,23 +52,17 @@ get_header();
 <div class="main-content pt-product-detail" style="padding: 40px 0; background: #fdfdfd;">
     <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
         <?php if ($product): ?>
-            <!-- Breadcrumb -->
-            <nav aria-label="breadcrumb" style="margin-bottom: 25px;">
-                <ol class="breadcrumb" style="background: #fff; padding: 15px 25px; margin: 0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e8eef5; display: flex; align-items: center; gap: 5px;">
-                    <li class="breadcrumb-item" style="display: flex; align-items: center;">
-                        <a href="<?php echo home_url(); ?>" style="color: var(--primary); text-decoration: none; font-weight: 500; display: flex; align-items: center; transition: all 0.3s ease; padding: 8px 12px; border-radius: 6px;" onmouseover="this.style.background='#f8f9fa'; this.style.color='#0056b3'" onmouseout="this.style.background='transparent'; this.style.color='var(--primary)'">
-                            <i class="fa fa-home" style="margin-right: 8px; font-size: 14px;"></i>Home
+            <!-- Breadcrumb (matches taxi package style) -->
+            <nav aria-label="breadcrumb" style="margin-bottom: 30px;">
+                <ol style="background: #fff; padding: 15px 25px; margin: 0; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e8eef5; display: flex; align-items: center; gap: 5px; list-style: none; flex-wrap: wrap;">
+                    <li style="display: flex; align-items: center;">
+                        <a href="<?php echo home_url(); ?>" style="color: var(--primary); text-decoration: none; font-weight: 500; padding: 8px 12px; border-radius: 6px; transition: all 0.3s;">
+                            <i class="fa fa-home" style="margin-right: 8px;"></i>Home
                         </a>
-                    </li>
-                    <li class="breadcrumb-item" style="display: flex; align-items: center;">
-                        <span style="color: #ccc; margin: 0 8px; font-size: 16px; font-weight: 300;">›</span>
-                        <a href="<?php echo home_url('/products'); ?>" style="color: var(--primary); text-decoration: none; font-weight: 500; transition: all 0.3s ease; padding: 8px 12px; border-radius: 6px;" onmouseover="this.style.background='#f8f9fa'; this.style.color='#0056b3'" onmouseout="this.style.background='transparent'; this.style.color='var(--primary)'">
-                            Products
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" style="display: flex; align-items: center;" aria-current="page">
-                        <span style="color: #ccc; margin: 0 8px; font-size: 16px; font-weight: 300;">›</span>
-                        <span style="color: var(--text-mid); font-weight: 600; padding: 8px 12px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef;">
+                        <span style="color: #ccc; margin: 0 4px; font-size: 16px;">›</span>
+                        <a href="<?php echo home_url('/products'); ?>" style="color: var(--text-dark); text-decoration: none; font-weight: 500; padding: 8px 12px; border-radius: 6px; transition: all 0.3s;">Products</a>
+                        <span style="color: #ccc; margin: 0 4px; font-size: 16px;">›</span>
+                        <span style="color: var(--text-mid); font-weight: 600; padding: 8px 12px; background: #f8f9fa; border-radius: 6px;">
                             <?php echo esc_html($product->title); ?>
                         </span>
                     </li>
@@ -220,12 +214,12 @@ get_header();
                         <!-- Action Buttons -->
                         <div class="action-buttons" style="margin-bottom: 25px;">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
-                                <button class="btn btn-primary" style="padding: 14px 20px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; background: var(--primary); color: white; cursor: pointer; transition: all 0.3s;">
+                                <a href="<?php echo esc_url(home_url('/cart?product_id=' . $product->id . '&product_slug=' . $product->slug)); ?>" class="btn btn-primary" style="padding: 14px 20px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; background: var(--primary); color: white; cursor: pointer; transition: all 0.3s; text-decoration: none; text-align: center;">
                                     <i class="fa fa-shopping-cart" style="margin-right: 8px;"></i> Add to Cart
-                                </button>
-                                <button class="btn btn-success" style="padding: 14px 20px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; background: #28a745; color: white; cursor: pointer; transition: all 0.3s;">
+                                </a>
+                                <a href="<?php echo esc_url(home_url('/buy-now?product_id=' . $product->id . '&product_slug=' . $product->slug)); ?>" class="btn btn-success" style="padding: 14px 20px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; background: #28a745; color: white; cursor: pointer; transition: all 0.3s; text-decoration: none; text-align: center;">
                                     <i class="fa fa-bolt" style="margin-right: 8px;"></i> Buy Now
-                                </button>
+                                </a>
                             </div>
                             
                             <div style="display: flex; gap: 10px;">
@@ -269,17 +263,17 @@ get_header();
                         <!-- Tab Navigation -->
                         <ul class="nav nav-tabs" style="border-bottom: 1px solid #e8eef5; padding: 0 25px; margin: 0;">
                             <li class="nav-item">
-                                <a class="nav-link active" href="#description" data-toggle="tab" style="padding: 15px 20px; font-weight: 600; color: var(--secondary); border: none; border-bottom: 3px solid transparent;">
+                                <a class="nav-link pt-tab-link active" href="#description" data-toggle="tab" style="padding: 15px 20px; font-weight: 600; color: var(--secondary); border: none; border-bottom: 3px solid var(--primary); display: inline-block;">
                                     Description
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#specifications" data-toggle="tab" style="padding: 15px 20px; font-weight: 600; color: var(--text-light); border: none; border-bottom: 3px solid transparent;">
+                                <a class="nav-link pt-tab-link" href="#specifications" data-toggle="tab" style="padding: 15px 20px; font-weight: 600; color: var(--text-light); border: none; border-bottom: 3px solid transparent; display: inline-block;">
                                     Specifications
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="#reviews" data-toggle="tab" style="padding: 15px 20px; font-weight: 600; color: var(--text-light); border: none; border-bottom: 3px solid transparent;">
+                                <a class="nav-link pt-tab-link" href="#reviews" data-toggle="tab" style="padding: 15px 20px; font-weight: 600; color: var(--text-light); border: none; border-bottom: 3px solid transparent; display: inline-block;">
                                     Reviews (0)
                                 </a>
                             </li>
@@ -458,28 +452,30 @@ document.addEventListener('DOMContentLoaded', function() {
     document.head.appendChild(style);
     
     // Tab functionality
-    const tabLinks = document.querySelectorAll('.nav-link');
+    const tabLinks = document.querySelectorAll('.pt-tab-link');
     const tabPanes = document.querySelectorAll('.tab-pane');
-    
+
+    function activateTab(link) {
+        tabLinks.forEach(l => {
+            l.classList.remove('active');
+            l.style.color = 'var(--text-light)';
+            l.style.borderBottom = '3px solid transparent';
+        });
+        tabPanes.forEach(p => p.classList.remove('show', 'active'));
+        link.classList.add('active');
+        link.style.color = 'var(--secondary)';
+        link.style.borderBottom = '3px solid var(--primary)';
+        const target = document.querySelector(link.getAttribute('href'));
+        if (target) target.classList.add('show', 'active');
+    }
+
+    // Activate first tab immediately on load
+    if (tabLinks.length > 0) activateTab(tabLinks[0]);
+
     tabLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            
-            // Remove active classes
-            tabLinks.forEach(l => {
-                l.classList.remove('active');
-                l.style.color = 'var(--text-light)';
-                l.style.borderBottom = '3px solid transparent';
-            });
-            tabPanes.forEach(p => p.classList.remove('show', 'active'));
-            
-            // Add active classes
-            this.classList.add('active');
-            this.style.color = 'var(--secondary)';
-            this.style.borderBottom = '3px solid var(--primary)';
-            
-            const target = document.querySelector(this.getAttribute('href'));
-            target.classList.add('show', 'active');
+            activateTab(this);
         });
     });
     

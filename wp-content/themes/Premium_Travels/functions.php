@@ -50,28 +50,35 @@ add_filter('query_vars', 'pt_add_product_query_vars');
  */
 function pt_product_template_redirect() {
     global $wp_query;
-    
+
     // Handle /products listing page
     if (is_page('products') || (isset($_SERVER['REQUEST_URI']) && preg_match('#^/travel/products/?(\?.*)?$#', $_SERVER['REQUEST_URI']))) {
         $template = get_template_directory() . '/page-products.php';
-        if (file_exists($template)) {
-            include $template;
-            exit;
-        }
+        if (file_exists($template)) { include $template; exit; }
     }
-    
+
+    // Handle /cart page
+    if (is_page('cart') || (isset($_SERVER['REQUEST_URI']) && preg_match('#^/travel/cart(/?\?.*)?$#', $_SERVER['REQUEST_URI']))) {
+        $template = get_template_directory() . '/page-cart.php';
+        if (file_exists($template)) { include $template; exit; }
+    }
+
+    // Handle /buy-now page
+    if (is_page('buy-now') || (isset($_SERVER['REQUEST_URI']) && preg_match('#^/travel/buy-now(/?\?.*)?$#', $_SERVER['REQUEST_URI']))) {
+        $template = get_template_directory() . '/page-buy-now.php';
+        if (file_exists($template)) { include $template; exit; }
+    }
+
     // Handle custom product URLs: /product/orange
     if (isset($wp_query->query_vars['product_slug'])) {
         include get_template_directory() . '/product-detail.php';
         exit;
     }
-    
+
     // Handle WordPress CPT permalinks: /pt_product/orange
     if (is_singular('pt_product')) {
-        // Get the post object
         $post = get_post();
         if ($post) {
-            // Set the product slug for our template
             $wp_query->set('product_slug', $post->post_name);
             include get_template_directory() . '/product-detail.php';
             exit;

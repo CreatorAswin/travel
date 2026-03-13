@@ -306,15 +306,39 @@ get_header();
                                 $p_city_simple = trim(explode(',', $p_city)[0]);
                                 $product_url = home_url('/product/' . $product->slug);
                         ?>
-                                <div class="product-item tr-total" data-city="<?php echo esc_attr(strtolower($p_city_simple)); ?>" style="background:#fff;border-radius:10px;padding:15px;box-shadow:var(--shadow-sm);border:1px solid #e8eef5;transition:var(--transition);display:flex;flex-direction:column;">
-                                    <a href="<?php echo esc_url($product_url); ?>" style="text-decoration:none;color:inherit;flex:1;display:block;">
-                                        <h4 style="font-size:15px;font-weight:700;color:var(--secondary);margin:0 0 6px;line-height:1.3;"><?php echo esc_html($product->title); ?></h4>
-                                        <div style="font-size:12px;color:var(--text-light);margin-bottom:8px;"><i class="fa fa-map-marker-alt" style="color:var(--primary);"></i> <?php echo esc_html($p_city); ?></div>
-                                        <div style="font-size:13px;color:var(--text-mid);margin-bottom:15px;line-height:1.5;"><?php echo wp_trim_words($product->short_description ?: $product->description, 12, '...'); ?></div>
-                                        <div style="font-size:18px;font-weight:800;color:var(--primary);margin-bottom:15px;"><i class="fa fa-rupee-sign" style="font-size:16px;"></i> <?php echo esc_html(number_format($p_price, 2)); ?></div>
+                        <?php
+                                // Get product image
+                                $p_img = $product->featured_image ?? '';
+                                if (empty($p_img) && !empty($product->gallery_images)) {
+                                    $imgs = explode(',', $product->gallery_images);
+                                    $p_img = trim($imgs[0]);
+                                }
+                                ?>
+                                <div class="product-item tr-total" data-city="<?php echo esc_attr(strtolower($p_city_simple)); ?>" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);border:1px solid #e8eef5;transition:var(--transition);display:flex;flex-direction:column;">
+                                    <!-- Product Image -->
+                                    <a href="<?php echo esc_url($product_url); ?>" style="display:block;height:150px;overflow:hidden;background:#f0f4f8;position:relative;">
+                                        <?php if ($p_img): ?>
+                                            <img src="<?php echo esc_url($p_img); ?>" alt="<?php echo esc_attr($product->title); ?>" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'" loading="lazy" />
+                                        <?php else: ?>
+                                            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fa fa-image" style="font-size:40px;color:#c8d5e8;"></i></div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($product->product_type)): ?>
+                                            <span style="position:absolute;top:8px;left:8px;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase;"><?php echo esc_html(ucfirst($product->product_type)); ?></span>
+                                        <?php endif; ?>
                                     </a>
-                                    <div style="text-align:center;padding-top:4px;">
-                                        <a href="<?php echo esc_url(home_url('/cab-booking')); ?>" class="df-button1" style="font-size:11px;padding:5px 14px;"><i class="fa fa-bolt"></i> Buy Now</a>
+                                    <!-- Card body -->
+                                    <div style="padding:12px;flex:1;display:flex;flex-direction:column;">
+                                        <a href="<?php echo esc_url($product_url); ?>" style="text-decoration:none;color:inherit;">
+                                            <h4 style="font-size:14px;font-weight:700;color:var(--secondary);margin:0 0 5px;line-height:1.3;"><?php echo esc_html($product->title); ?></h4>
+                                            <?php if ($p_city): ?>
+                                                <div style="font-size:11px;color:var(--text-light);margin-bottom:7px;"><i class="fa fa-map-marker-alt" style="color:var(--primary);margin-right:3px;"></i><?php echo esc_html($p_city); ?></div>
+                                            <?php endif; ?>
+                                            <div style="font-size:17px;font-weight:800;color:var(--primary);margin-bottom:10px;"><i class="fa fa-rupee-sign" style="font-size:14px;"></i> <?php echo esc_html(number_format($p_price, 2)); ?></div>
+                                        </a>
+                                        <div style="display:flex;gap:6px;margin-top:auto;">
+                                            <a href="<?php echo esc_url(home_url('/cart?product_id=' . $product->id . '&product_slug=' . $product->slug)); ?>" class="df-button2" style="flex:1;justify-content:center;font-size:11px;padding:6px 8px;text-align:center;"><i class="fa fa-shopping-cart" style="margin-right:3px;"></i>Add to Cart</a>
+                                            <a href="<?php echo esc_url(home_url('/buy-now?product_id=' . $product->id . '&product_slug=' . $product->slug)); ?>" class="df-button1" style="flex:1;justify-content:center;font-size:11px;padding:6px 8px;text-align:center;"><i class="fa fa-bolt" style="margin-right:3px;"></i>Buy Now</a>
+                                        </div>
                                     </div>
                                 </div>
                                 <?php
