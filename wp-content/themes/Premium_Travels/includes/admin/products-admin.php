@@ -35,6 +35,9 @@ class PT_Products_Admin {
     private function display_form($action, $product_id, $locations) {
         $product = null;
         
+        // Enqueue WordPress media scripts for image uploader
+        wp_enqueue_media();
+        
         if ($action === 'edit' && $product_id) {
             $product = $this->manager->get_by_id($product_id);
             if (!$product) {
@@ -109,6 +112,128 @@ class PT_Products_Admin {
                             <textarea name="short_description" class="regular-text" rows="3" placeholder="Brief product description"><?php echo esc_textarea($product->short_description ?? ''); ?></textarea>
                         </td>
                     </tr>
+                    <tr>
+                        <th colspan="2"><h2 style="margin: 30px 0 15px 0; padding: 10px 0; border-bottom: 1px solid #ddd;">Product Images</h2></th>
+                    </tr>
+                    <tr>
+                        <th scope="row">Featured Image</th>
+                        <td>
+                            <?php
+                            $featured_image = esc_url($product->featured_image ?? '');
+                            ?>
+                            <div id="pt-featured-image-wrap" style="margin-bottom: 10px;">
+                                <?php if ($featured_image): ?>
+                                    <div id="pt-featured-image-preview" style="margin-bottom: 10px;">
+                                        <img src="<?php echo $featured_image; ?>" style="max-width: 200px; max-height: 150px; border-radius: 6px; border: 1px solid #ddd;" />
+                                        <br><a href="#" id="pt-remove-featured-image" style="color: red; font-size: 12px;">&#10005; Remove Image</a>
+                                    </div>
+                                <?php else: ?>
+                                    <div id="pt-featured-image-preview" style="display:none; margin-bottom: 10px;">
+                                        <img src="" style="max-width: 200px; max-height: 150px; border-radius: 6px; border: 1px solid #ddd;" />
+                                        <br><a href="#" id="pt-remove-featured-image" style="color: red; font-size: 12px;">&#10005; Remove Image</a>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <input type="hidden" name="featured_image" id="pt-featured-image-url" value="<?php echo $featured_image; ?>" />
+                            <button type="button" class="button" id="pt-upload-featured-image">
+                                <span class="dashicons dashicons-format-image" style="margin: 3px 4px 0 0; font-size: 16px;"></span>
+                                <?php echo $featured_image ? 'Change Featured Image' : 'Upload Featured Image'; ?>
+                            </button>
+                            <p class="description">This is the main product image shown at the top of the product page.</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Gallery Images</th>
+                        <td>
+                            <?php
+                            $gallery_raw = $product->gallery_images ?? '';
+                            $gallery_urls = array_filter(array_map('trim', explode(',', $gallery_raw)));
+                            ?>
+                            <div id="pt-gallery-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                                <?php foreach ($gallery_urls as $idx => $gurl): ?>
+                                    <div class="pt-gallery-item" style="position: relative; display: inline-block;">
+                                        <img src="<?php echo esc_url($gurl); ?>" style="width: 100px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; display: block;" />
+                                        <a href="#" class="pt-remove-gallery-item" data-url="<?php echo esc_attr($gurl); ?>" style="position: absolute; top: 2px; right: 4px; color: #fff; background: rgba(220,50,50,0.85); border-radius: 50%; width: 18px; height: 18px; text-align: center; line-height: 16px; font-size: 12px; text-decoration: none; font-weight: bold;">&#10005;</a>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <input type="hidden" name="gallery_images" id="pt-gallery-images-input" value="<?php echo esc_attr($gallery_raw); ?>" />
+                            <button type="button" class="button" id="pt-upload-gallery-images">
+                                <span class="dashicons dashicons-images-alt2" style="margin: 3px 4px 0 0; font-size: 16px;"></span>
+                                Add Gallery Images
+                            </button>
+                            <p class="description">Select multiple images to display in the product gallery slideshow. These will appear as thumbnails below the main image.</p>
+                        </td>
+                    </tr>
+                    <script type="text/javascript">
+                    jQuery(document).ready(function($) {
+                        // --- Featured Image Uploader ---
+                        var featuredFrame;
+                        $('#pt-upload-featured-image').on('click', function(e) {
+                            e.preventDefault();
+                            if (featuredFrame) { featuredFrame.open(); return; }
+                            featuredFrame = wp.media({
+                                title: 'Select Featured Image',
+                                button: { text: 'Use this image' },
+                                multiple: false
+                            });
+                            featuredFrame.on('select', function() {
+                                var attachment = featuredFrame.state().get('selection').first().toJSON();
+                                var url = attachment.url;
+                                $('#pt-featured-image-url').val(url);
+                                $('#pt-featured-image-preview img').attr('src', url);
+                                $('#pt-featured-image-preview').show();
+                                $('#pt-upload-featured-image').text('Change Featured Image');
+                            });
+                            featuredFrame.open();
+                        });
+                        $('#pt-remove-featured-image').on('click', function(e) {
+                            e.preventDefault();
+                            $('#pt-featured-image-url').val('');
+                            $('#pt-featured-image-preview').hide();
+                            $('#pt-upload-featured-image').html('<span class="dashicons dashicons-format-image" style="margin: 3px 4px 0 0; font-size: 16px;"></span> Upload Featured Image');
+                        });
+
+                        // --- Gallery Images Uploader ---
+                        var galleryFrame;
+                        $('#pt-upload-gallery-images').on('click', function(e) {
+                            e.preventDefault();
+                            galleryFrame = wp.media({
+                                title: 'Add Gallery Images',
+                                button: { text: 'Add to Gallery' },
+                                multiple: 'add'
+                            });
+                            galleryFrame.on('select', function() {
+                                var selection = galleryFrame.state().get('selection');
+                                var currentVal = $('#pt-gallery-images-input').val();
+                                var currentUrls = currentVal ? currentVal.split(',').map(s => s.trim()).filter(Boolean) : [];
+                                selection.each(function(attachment) {
+                                    var url = attachment.toJSON().url;
+                                    if (currentUrls.indexOf(url) === -1) {
+                                        currentUrls.push(url);
+                                        var item = $('<div class="pt-gallery-item" style="position: relative; display: inline-block; margin: 0;">' +
+                                            '<img src="' + url + '" style="width: 100px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; display: block;" />' +
+                                            '<a href="#" class="pt-remove-gallery-item" data-url="' + url + '" style="position: absolute; top: 2px; right: 4px; color: #fff; background: rgba(220,50,50,0.85); border-radius: 50%; width: 18px; height: 18px; text-align: center; line-height: 16px; font-size: 12px; text-decoration: none; font-weight: bold;">&#10005;</a>' +
+                                            '</div>');
+                                        $('#pt-gallery-preview').append(item);
+                                    }
+                                });
+                                $('#pt-gallery-images-input').val(currentUrls.join(','));
+                            });
+                            galleryFrame.open();
+                        });
+
+                        // Remove gallery item
+                        $(document).on('click', '.pt-remove-gallery-item', function(e) {
+                            e.preventDefault();
+                            var url = $(this).data('url');
+                            $(this).closest('.pt-gallery-item').remove();
+                            var currentUrls = $('#pt-gallery-images-input').val().split(',').map(s => s.trim()).filter(Boolean);
+                            currentUrls = currentUrls.filter(u => u !== url);
+                            $('#pt-gallery-images-input').val(currentUrls.join(','));
+                        });
+                    });
+                    </script>
                     <tr>
                         <th colspan="2"><h2 style="margin: 30px 0 15px 0; padding: 10px 0; border-bottom: 1px solid #ddd;">Descriptions</h2></th>
                     </tr>
@@ -339,24 +464,7 @@ class PT_Products_Admin {
                             </table>
                         </td>
                     </tr>
-                    <tr>
-                        <th colspan="2"><h2 style="margin: 30px 0 15px 0; padding: 10px 0; border-bottom: 1px solid #ddd;">Images</h2></th>
-                    </tr>
-                    <tr>
-                        <th scope="row">Images</th>
-                        <td>
-                            <table>
-                                <tr>
-                                    <td style="padding-right: 20px;">Featured Image:</td>
-                                    <td><input type="url" name="featured_image" value="<?php echo esc_url($product->featured_image ?? ''); ?>" class="regular-text" placeholder="Image URL" /></td>
-                                </tr>
-                                <tr>
-                                    <td style="padding-right: 20px;">Gallery Images:</td>
-                                    <td><textarea name="gallery_images" class="regular-text" rows="3" placeholder="Additional image URLs (comma separated)"><?php echo esc_textarea($product->gallery_images ?? ''); ?></textarea></td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
+                    <?php /* Product Images section moved above, after Short Description */ ?>
                     <tr>
                         <th colspan="2"><h2 style="margin: 30px 0 15px 0; padding: 10px 0; border-bottom: 1px solid #ddd;">Product Relations</h2></th>
                     </tr>

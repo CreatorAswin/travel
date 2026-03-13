@@ -27,8 +27,7 @@ add_action('after_setup_theme', 'premium_travels_setup');
 /**
  * Add rewrite rules for product URLs
  */
-function pt_add_product_rewrite_rules()
-{
+function pt_add_product_rewrite_rules() {
     add_rewrite_rule(
         '^product/([^/]+)/?$',
         'index.php?pagename=product-detail&product_slug=$matches[1]',
@@ -40,8 +39,7 @@ add_action('init', 'pt_add_product_rewrite_rules');
 /**
  * Add query var for product slug
  */
-function pt_add_product_query_vars($vars)
-{
+function pt_add_product_query_vars($vars) {
     $vars[] = 'product_slug';
     return $vars;
 }
@@ -50,16 +48,24 @@ add_filter('query_vars', 'pt_add_product_query_vars');
 /**
  * Template redirect for product pages - handle both URL formats
  */
-function pt_product_template_redirect()
-{
+function pt_product_template_redirect() {
     global $wp_query;
-
+    
+    // Handle /products listing page
+    if (is_page('products') || (isset($_SERVER['REQUEST_URI']) && preg_match('#^/travel/products/?(\?.*)?$#', $_SERVER['REQUEST_URI']))) {
+        $template = get_template_directory() . '/page-products.php';
+        if (file_exists($template)) {
+            include $template;
+            exit;
+        }
+    }
+    
     // Handle custom product URLs: /product/orange
     if (isset($wp_query->query_vars['product_slug'])) {
         include get_template_directory() . '/product-detail.php';
         exit;
     }
-
+    
     // Handle WordPress CPT permalinks: /pt_product/orange
     if (is_singular('pt_product')) {
         // Get the post object
@@ -73,6 +79,7 @@ function pt_product_template_redirect()
     }
 }
 add_action('template_redirect', 'pt_product_template_redirect');
+
 
 /**
  * Enqueue scripts and styles.
@@ -304,8 +311,7 @@ require_once get_template_directory() . '/includes/admin/admin-menu.php';
 require_once get_template_directory() . '/includes/frontend/dynamic-display.php';
 
 // Shortcodes for frontend display
-function pt_packages_shortcode($atts)
-{
+function pt_packages_shortcode($atts) {
     $atts = shortcode_atts(array(
         'limit' => 6,
         'category' => '',
@@ -313,49 +319,46 @@ function pt_packages_shortcode($atts)
         'featured' => false,
         'columns' => 3
     ), $atts);
-
+    
     return pt_display_packages($atts);
 }
 add_shortcode('pt_packages', 'pt_packages_shortcode');
 
-function pt_car_types_shortcode($atts)
-{
+function pt_car_types_shortcode($atts) {
     $atts = shortcode_atts(array(
         'limit' => 6,
         'category' => '',
         'columns' => 3
     ), $atts);
-
+    
     return pt_display_car_types($atts);
 }
 add_shortcode('pt_car_types', 'pt_car_types_shortcode');
 
-function pt_routes_shortcode($atts)
-{
+function pt_routes_shortcode($atts) {
     $atts = shortcode_atts(array(
         'limit' => 6,
         'from' => '',
         'to' => '',
         'columns' => 2
     ), $atts);
-
+    
     return pt_display_routes($atts);
 }
 add_shortcode('pt_routes', 'pt_routes_shortcode');
 
-function pt_products_shortcode($atts)
-{
+function pt_products_shortcode($atts) {
     $atts = shortcode_atts(array(
         'limit' => 6,
         'product_type' => '',
         'location_id' => 0,
         'show_featured_only' => false
     ), $atts);
-
+    
     $atts['limit'] = absint($atts['limit']);
     $atts['location_id'] = absint($atts['location_id']);
     $atts['show_featured_only'] = (bool)$atts['show_featured_only'];
-
+    
     return pt_display_products($atts);
 }
 add_shortcode('pt_products', 'pt_products_shortcode');

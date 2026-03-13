@@ -4,11 +4,13 @@
  * Template for displaying individual product details with e-commerce features
  */
 
+// Make $post globally available throughout this template
+global $post;
+
 // Get product slug from URL
 $product_slug = get_query_var('product_slug');
 if (!$product_slug) {
     // Fallback to post name if coming from WordPress permalink
-    global $post;
     if ($post && $post->post_type === 'pt_product') {
         $product_slug = $post->post_name;
     }
@@ -26,7 +28,7 @@ if ($product_slug) {
         "SELECT * FROM {$wpdb->prefix}pt_products WHERE slug = %s AND is_active = 1",
         $product_slug
     ));
-
+    
     if ($product) {
         $product = $products_manager->format_record($product);
     }
@@ -38,7 +40,7 @@ if (!$product && $post) {
         "SELECT * FROM {$wpdb->prefix}pt_products WHERE title = %s AND is_active = 1",
         $post->post_title
     ));
-
+    
     if ($product) {
         $product = $products_manager->format_record($product);
     }
@@ -76,88 +78,66 @@ get_header();
             <div class="row" style="display: flex; flex-wrap: wrap; margin: 0 -15px;">
                 <!-- Product Gallery (65% width) -->
                 <div class="col-md-8" style="flex: 0 0 65%; max-width: 65%; padding: 0 15px;">
-                    <?php
-    // Find the WordPress post ID for this product to get featured image and gallery meta
-    $wp_post_id = 0;
-    if (isset($post) && $post->post_type === 'pt_product' && $post->post_name === $product_slug) {
-        $wp_post_id = $post->ID;
-    }
-    else {
-        // Query the post by title or slug if $post isn't the right one
-        $pt_posts = get_posts(array(
-            'post_type' => 'pt_product',
-            'name' => $product_slug,
-            'posts_per_page' => 1
-        ));
-        if ($pt_posts) {
-            $wp_post_id = $pt_posts[0]->ID;
-        }
-    }
-
-    $gallery_ids = $wp_post_id ? get_post_meta($wp_post_id, 'product_gallery_images', true) : '';
-    $featured_id = $wp_post_id ? get_post_thumbnail_id($wp_post_id) : 0;
-?>
                     <div class="product-gallery" style="position: sticky; top: 20px;">
-                        <div class="main-image-container" style="background: #fff; border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-md); margin-bottom: 20px; height: 450px; display: flex; align-items: center; justify-content: center; border: 1px solid #e8eef5;">
-                            <?php if ($featured_id): ?>
-                                <img id="pt-product-main-view" src="<?php echo wp_get_attachment_image_url($featured_id, 'large'); ?>" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;">
-                            <?php
-    else: ?>
-                                <div id="pt-product-main-placeholder" style="text-align: center; color: #ccc;">
-                                    <i class="fa fa-image" style="font-size: 80px; margin-bottom: 15px; color: #e0e0e0; display: block;"></i>
-                                    <div style="font-size: 14px;">No main image available</div>
-                                </div>
-                                <img id="pt-product-main-view" src="" style="max-width: 100%; max-height: 100%; object-fit: contain; display: none;">
-                            <?php
-    endif; ?>
-                        </div>
-                        
-                        <!-- Thumbnails Gallery -->
-                        <?php if ($gallery_ids || $featured_id): ?>
-                            <div class="thumbnails" style="display: flex; gap: 12px; overflow-x: auto; padding: 5px 0;">
-                                <?php if ($featured_id): ?>
-                                    <div class="product-thumb-item active" style="width: 100px; height: 80px; flex-shrink: 0; border-radius: 10px; overflow: hidden; cursor: pointer; border: 2.5px solid var(--primary); transition: all 0.3s;">
-                                        <img src="<?php echo wp_get_attachment_image_url($featured_id, 'thumbnail'); ?>" data-full="<?php echo wp_get_attachment_image_url($featured_id, 'large'); ?>" style="width: 100%; height: 100%; object-fit: cover;">
-                                    </div>
-                                <?php
-        endif; ?>
-                                <?php
-        if ($gallery_ids) {
-            $ids = explode(',', $gallery_ids);
-            foreach ($ids as $g_id) {
-                $g_id = intval(trim($g_id));
-                if ($g_id && $g_id != $featured_id) {
-                    $thumb = wp_get_attachment_image_url($g_id, 'thumbnail');
-                    $full = wp_get_attachment_image_url($g_id, 'large');
-                    if ($thumb) {
-                        echo '<div class="product-thumb-item" style="width: 100px; height: 80px; flex-shrink: 0; border-radius: 10px; overflow: hidden; cursor: pointer; border: 2.5px solid transparent; transition: all 0.3s; opacity: 0.7;">';
-                        echo '<img src="' . esc_url($thumb) . '" data-full="' . esc_url($full) . '" style="width:100%;height:100%;object-fit:cover;">';
-                        echo '</div>';
-                    }
-                }
-            }
-        }
-?>
-                            </div>
-                            <script>
-                                jQuery(document).ready(function($) {
-                                    $('.product-thumb-item').click(function() {
-                                        var fullUrl = $(this).find('img').data('full');
-                                        $('#pt-product-main-view').attr('src', fullUrl).show();
-                                        $('#pt-product-main-placeholder').hide();
-                                        $('.product-thumb-item').css({
-                                            'border-color': 'transparent',
-                                            'opacity': '0.7'
-                                        });
-                                        $(this).css({
-                                            'border-color': 'var(--primary)',
-                                            'opacity': '1'
-                                        });
-                                    });
-                                });
-                            </script>
                         <?php
-    endif; ?>
+                        // Collect gallery image URLs
+                        $main_image_url = '';
+                        $gallery_image_urls = array();
+
+                        // Priority 1: DB featured_image field (uploaded via admin uploader)
+                        if (!empty($product->featured_image)) {
+                            $main_image_url = $product->featured_image;
+                        }
+
+                        // Priority 2: WordPress post featured image
+                        if (empty($main_image_url) && $post && has_post_thumbnail($post->ID)) {
+                            $main_image_url = get_the_post_thumbnail_url($post->ID, 'large');
+                        }
+
+                        // Collect gallery images from DB
+                        if (!empty($product->gallery_images)) {
+                            $raw_gallery = explode(',', $product->gallery_images);
+                            foreach ($raw_gallery as $gurl) {
+                                $gurl = trim($gurl);
+                                if (!empty($gurl)) {
+                                    $gallery_image_urls[] = $gurl;
+                                }
+                            }
+                        }
+
+                        // If still no main image, use first gallery image
+                        if (empty($main_image_url) && !empty($gallery_image_urls)) {
+                            $main_image_url = array_shift($gallery_image_urls);
+                        }
+                        ?>
+                        <div class="main-image" id="pt-main-image" style="background: #fff; border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-sm); margin-bottom: 15px; height: 400px; display: flex; align-items: center; justify-content: center;">
+                            <?php if ($main_image_url): ?>
+                                <img id="pt-main-img-tag" src="<?php echo esc_url($main_image_url); ?>" alt="<?php echo esc_attr($product->title); ?>" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+                            <?php else: ?>
+                                <div style="text-align: center; color: #ccc; font-size: 14px; padding: 20px;">
+                                    <i class="fa fa-image" style="font-size: 60px; margin-bottom: 15px; color: #e0e0e0;"></i>
+                                    <div>No image available</div>
+                                    <div style="font-size: 12px; margin-top: 10px; color: #999;">Add images in WordPress admin &rarr; Products</div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Thumbnails -->
+                        <?php
+                        // Build thumbnails: featured + gallery
+                        $all_thumbs = array();
+                        if ($main_image_url) $all_thumbs[] = $main_image_url;
+                        foreach ($gallery_image_urls as $g) $all_thumbs[] = $g;
+                        ?>
+                        <?php if (count($all_thumbs) > 0): ?>
+                        <div class="thumbnails" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <?php foreach ($all_thumbs as $ti => $turl): ?>
+                                <div onclick="document.getElementById('pt-main-img-tag').src='<?php echo esc_js($turl); ?>'" style="width: 80px; height: 80px; background: #f8f9fa; border-radius: 8px; border: 2px solid <?php echo $ti === 0 ? 'var(--primary)' : '#e9ecef'; ?>; overflow: hidden; cursor: pointer; flex-shrink: 0; transition: border-color 0.2s;" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='<?php echo $ti === 0 ? 'var(--primary)' : '#e9ecef'; ?>'">
+                                    <img src="<?php echo esc_url($turl); ?>" style="width: 100%; height: 100%; object-fit: cover;" />
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -170,24 +150,21 @@ get_header();
                         </h1>
 
                         <!-- Location -->
-                        <?php if ($product->location_id):
-        global $wpdb;
-        $location = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}pt_locations WHERE id = %d AND is_active = 1", $product->location_id));
-        if ($location): ?>
+                        <?php if ($product->location_id): 
+                            global $wpdb;
+                            $location = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}pt_locations WHERE id = %d AND is_active = 1", $product->location_id));
+                            if ($location): ?>
                                 <div class="product-location" style="margin-bottom: 20px; display: flex; align-items: center;">
                                     <i class="fa fa-map-marker-alt" style="color: var(--primary); margin-right: 8px;"></i>
                                     <span style="color: var(--text-mid); font-size: 14px;"><?php echo esc_html($location->title); ?></span>
                                 </div>
-                            <?php
-        else: ?>
+                            <?php else: ?>
                                 <!-- Debug: Location not found -->
                                 <div style="margin-bottom: 20px; color: #ff6b6b; font-size: 12px;">
                                     Location ID <?php echo $product->location_id; ?> not found in database
                                 </div>
-                            <?php
-        endif; ?>
-                        <?php
-    endif; ?>
+                            <?php endif; ?>
+                        <?php endif; ?>
 
                         <!-- Price Section -->
                         <div class="price-section" style="margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
@@ -202,21 +179,18 @@ get_header();
                                     <div class="discount-badge" style="background: #e74c3c; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
                                         <?php echo round($product->discount_percentage); ?>% OFF
                                     </div>
-                                <?php
-    else: ?>
+                                <?php else: ?>
                                     <div class="regular-price" style="font-size: 32px; font-weight: 800; color: var(--primary);">
                                         <i class="fa fa-rupee-sign"></i> <?php echo number_format($product->price_regular, 2); ?>
                                     </div>
-                                <?php
-    endif; ?>
+                                <?php endif; ?>
                             </div>
                             
                             <?php if ($product->sku): ?>
                                 <div class="sku" style="font-size: 13px; color: var(--text-light);">
                                     SKU: <?php echo esc_html($product->sku); ?>
                                 </div>
-                            <?php
-    endif; ?>
+                            <?php endif; ?>
                         </div>
 
                         <!-- Product Type -->
@@ -226,8 +200,7 @@ get_header();
                                     <?php echo esc_html(ucfirst($product->product_type)); ?>
                                 </span>
                             </div>
-                        <?php
-    endif; ?>
+                        <?php endif; ?>
 
                         <!-- Availability -->
                         <div class="availability" style="margin-bottom: 25px;">
@@ -240,27 +213,26 @@ get_header();
                                     <span style="color: var(--text-light); font-size: 14px;">
                                         (<?php echo $product->stock_quantity; ?> available)
                                     </span>
-                                <?php
-    endif; ?>
+                                <?php endif; ?>
                             </div>
                         </div>
 
                         <!-- Action Buttons -->
                         <div class="action-buttons" style="margin-bottom: 25px;">
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
-                                <button class="df-button1">
+                                <button class="btn btn-primary" style="padding: 14px 20px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; background: var(--primary); color: white; cursor: pointer; transition: all 0.3s;">
                                     <i class="fa fa-shopping-cart" style="margin-right: 8px;"></i> Add to Cart
                                 </button>
-                                <button class="df-button3" style="background: #28a745 !important;">
+                                <button class="btn btn-success" style="padding: 14px 20px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; background: #28a745; color: white; cursor: pointer; transition: all 0.3s;">
                                     <i class="fa fa-bolt" style="margin-right: 8px;"></i> Buy Now
                                 </button>
                             </div>
                             
                             <div style="display: flex; gap: 10px;">
-                                <button class="df-button2" style="flex: 1;">
+                                <button class="btn btn-outline-secondary" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white; cursor: pointer;">
                                     <i class="fa fa-heart" style="margin-right: 5px;"></i> Wishlist
                                 </button>
-                                <button class="df-button2" style="flex: 1;">
+                                <button class="btn btn-outline-secondary" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: white; cursor: pointer;">
                                     <i class="fa fa-share-alt" style="margin-right: 5px;"></i> Share
                                 </button>
                             </div>
@@ -273,8 +245,7 @@ get_header();
                                     <span style="color: var(--text-light);">Weight:</span>
                                     <span style="font-weight: 600;"><?php echo $product->weight; ?> kg</span>
                                 </div>
-                            <?php
-    endif; ?>
+                            <?php endif; ?>
                             
                             <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;">
                                 <span style="color: var(--text-light);">Category:</span>
@@ -336,15 +307,13 @@ get_header();
                                             <td style="padding: 12px; border: 1px solid #eee; background: #f8f9fa; font-weight: 600;">SKU</td>
                                             <td style="padding: 12px; border: 1px solid #eee;"><?php echo esc_html($product->sku); ?></td>
                                         </tr>
-                                        <?php
-    endif; ?>
+                                        <?php endif; ?>
                                         <?php if ($product->weight): ?>
                                         <tr>
                                             <td style="padding: 12px; border: 1px solid #eee; background: #f8f9fa; font-weight: 600;">Weight</td>
                                             <td style="padding: 12px; border: 1px solid #eee;"><?php echo $product->weight; ?> kg</td>
                                         </tr>
-                                        <?php
-    endif; ?>
+                                        <?php endif; ?>
                                         <tr>
                                             <td style="padding: 12px; border: 1px solid #eee; background: #f8f9fa; font-weight: 600;">Availability</td>
                                             <td style="padding: 12px; border: 1px solid #eee;"><?php echo $product->stock_quantity > 0 ? 'In Stock' : 'Out of Stock'; ?></td>
@@ -375,42 +344,42 @@ get_header();
                 </div>
                 
                 <?php
-    // Get related products (same location or random, latest first)
-    $related_products = array();
-    if ($product->location_id) {
-        $related_products = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}pt_products 
+                // Get related products (same location or random, latest first)
+                $related_products = array();
+                if ($product->location_id) {
+                    $related_products = $wpdb->get_results($wpdb->prepare(
+                        "SELECT * FROM {$wpdb->prefix}pt_products 
                          WHERE location_id = %d 
                          AND id != %d 
                          AND is_active = 1 
                          ORDER BY created_at DESC 
                          LIMIT 4",
-            $product->location_id,
-            $product->id
-        ));
-    }
-
-    if (empty($related_products)) {
-        $related_products = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}pt_products 
+                        $product->location_id,
+                        $product->id
+                    ));
+                }
+                
+                if (empty($related_products)) {
+                    $related_products = $wpdb->get_results($wpdb->prepare(
+                        "SELECT * FROM {$wpdb->prefix}pt_products 
                          WHERE id != %d 
                          AND is_active = 1 
                          ORDER BY created_at DESC 
                          LIMIT 4",
-            $product->id
-        ));
-    }
-
-    foreach ($related_products as $related_product):
-        $related_product = $products_manager->format_record($related_product);
-        $related_location = '';
-        if ($related_product->location_id) {
-            $loc = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}pt_locations WHERE id = %d", $related_product->location_id));
-            if ($loc) {
-                $related_location = $loc->title;
-            }
-        }
-?>
+                        $product->id
+                    ));
+                }
+                
+                foreach ($related_products as $related_product):
+                    $related_product = $products_manager->format_record($related_product);
+                    $related_location = '';
+                    if ($related_product->location_id) {
+                        $loc = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}pt_locations WHERE id = %d", $related_product->location_id));
+                        if ($loc) {
+                            $related_location = $loc->title;
+                        }
+                    }
+                ?>
                     <div class="col-md-3 col-sm-6" style="margin-bottom: 25px;">
                         <a href="<?php echo home_url('/product/' . $related_product->slug); ?>" style="display: block; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid #f1f1f1; text-decoration: none; color: inherit; transition: all 0.3s; height: 100%;">
                             <div style="height: 200px; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
@@ -425,8 +394,7 @@ get_header();
                                         <i class="fa fa-map-marker-alt" style="margin-right: 5px;"></i>
                                         <?php echo esc_html($related_location); ?>
                                     </div>
-                                <?php
-        endif; ?>
+                                <?php endif; ?>
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <div style="font-size: 18px; font-weight: 800; color: var(--primary);">
                                         <i class="fa fa-rupee-sign"></i> <?php echo number_format($related_product->price_regular, 2); ?>
@@ -438,12 +406,10 @@ get_header();
                             </div>
                         </a>
                     </div>
-                <?php
-    endforeach; ?>
+                <?php endforeach; ?>
             </div>
 
-        <?php
-else: ?>
+        <?php else: ?>
             <!-- Product Not Found -->
             <div class="row">
                 <div class="col-md-12 text-center" style="padding: 60px 20px;">
@@ -457,8 +423,7 @@ else: ?>
                     </a>
                 </div>
             </div>
-        <?php
-endif; ?>
+        <?php endif; ?>
     </div>
 </div>
 </div>
