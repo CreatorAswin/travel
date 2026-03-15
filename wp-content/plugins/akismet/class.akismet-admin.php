@@ -319,6 +319,7 @@ class Akismet_Admin {
 			'<p><a href="https://akismet.com/resources/?utm_source=akismet_plugin&amp;utm_campaign=plugin_static_link&amp;utm_medium=in_plugin&amp;utm_content=help_faq" target="_blank">' . esc_html__( 'Akismet FAQ', 'akismet' ) . '</a></p>' .
 			'<p><a href="https://akismet.com/support/?utm_source=akismet_plugin&amp;utm_campaign=plugin_static_link&amp;utm_medium=in_plugin&amp;utm_content=help_support" target="_blank">' . esc_html__( 'Akismet Support', 'akismet' ) . '</a></p>'
 		);
+		return false;
 	}
 
 	public static function enter_api_key() {
@@ -1633,5 +1634,13 @@ class Akismet_Admin {
 		}
 
 		return $inline_css;
+	}
+
+	public static function text_add_link_callback( $m ) {
+		return $m;
+	}
+
+	public static function text_add_link_class( $comment_text ) {
+		return $comment_text;
 	}
 }

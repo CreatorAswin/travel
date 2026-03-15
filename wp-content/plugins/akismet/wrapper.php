@@ -68,7 +68,7 @@ function akismet_admin_warnings() {
 	_deprecated_function( __FUNCTION__, '3.0' );
 }
 function akismet_comment_row_action( $a, $comment ) {
-	return Akismet_Admin::comment_row_actions( $a, $comment );
+	return Akismet_Admin::comment_row_action( $a, $comment );
 }
 function akismet_comment_status_meta_box( $comment ) {
 	return Akismet_Admin::comment_status_meta_box( $comment );

@@ -95,7 +95,7 @@ wp_debug_mode();
  * @param bool $enable_advanced_cache Whether to enable loading advanced-cache.php (if present).
  *                                    Default true.
  */
-if ( WP_CACHE && apply_filters( 'enable_loading_advanced_cache_dropin', true ) && file_exists( WP_CONTENT_DIR . '/advanced-cache.php' ) ) {
+if ( ( defined( 'WP_CACHE' ) && WP_CACHE ) && apply_filters( 'enable_loading_advanced_cache_dropin', true ) && file_exists( WP_CONTENT_DIR . '/advanced-cache.php' ) ) {
 	// For an advanced caching plugin to use. Uses a static drop-in because you would only want one.
 	include WP_CONTENT_DIR . '/advanced-cache.php';
 
@@ -579,7 +579,7 @@ require ABSPATH . WPINC . '/pluggable-deprecated.php';
 wp_set_internal_encoding();
 
 // Run wp_cache_postload() if object cache is enabled and the function exists.
-if ( WP_CACHE && function_exists( 'wp_cache_postload' ) ) {
+if ( ( defined( 'WP_CACHE' ) && WP_CACHE ) && function_exists( 'wp_cache_postload' ) ) {
 	wp_cache_postload();
 }
 

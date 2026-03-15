@@ -357,9 +357,9 @@ function signup_another_blog( $blogname = '', $blog_title = '', $errors = '' ) {
 	 * @param array $signup_defaults {
 	 *     An array of default site sign-up variables.
 	 *
-	 *     @type string   $blogname   The site blogname.
-	 *     @type string   $blog_title The site title.
-	 *     @type WP_Error $errors     A WP_Error object possibly containing 'blogname' or 'blog_title' errors.
+	 *     @var string   $blogname   The site blogname.
+	 *     @var string   $blog_title The site title.
+	 *     @var WP_Error $errors     A WP_Error object possibly containing 'blogname' or 'blog_title' errors.
 	 * }
 	 */
 	$filtered_results = apply_filters( 'signup_another_blog_init', $signup_defaults );
@@ -497,8 +497,8 @@ function validate_another_blog_signup() {
 	 * @param array $meta {
 	 *     An array of default site meta variables.
 	 *
-	 *     @type int $lang_id     The language ID.
-	 *     @type int $blog_public Whether search engines should be discouraged from indexing the site. 1 for true, 0 for false.
+	 *     @var int $lang_id     The language ID.
+	 *     @var int $blog_public Whether search engines should be discouraged from indexing the site. 1 for true, 0 for false.
 	 * }
 	 */
 	$meta = apply_filters( 'add_signup_meta', $meta_defaults );
@@ -611,9 +611,9 @@ function signup_user( $user_name = '', $user_email = '', $errors = '' ) {
 	 * @param array $signup_user_defaults {
 	 *     An array of default user variables.
 	 *
-	 *     @type string   $user_name  The user username.
-	 *     @type string   $user_email The user email address.
-	 *     @type WP_Error $errors     A WP_Error object with possible errors relevant to the sign-up user.
+	 *     @var string   $user_name  The user username.
+	 *     @var string   $user_email The user email address.
+	 *     @var WP_Error $errors     A WP_Error object with possible errors relevant to the sign-up user.
 	 * }
 	 */
 	$filtered_results = apply_filters( 'signup_user_init', $signup_user_defaults );
@@ -753,11 +753,11 @@ function signup_blog( $user_name = '', $user_email = '', $blogname = '', $blog_t
 	 * @param array $signup_blog_defaults {
 	 *     An array of default site creation variables.
 	 *
-	 *     @type string   $user_name  The user username.
-	 *     @type string   $user_email The user email address.
-	 *     @type string   $blogname   The blogname.
-	 *     @type string   $blog_title The title of the site.
-	 *     @type WP_Error $errors     A WP_Error object with possible errors relevant to new site creation variables.
+	 *     @var string   $user_name  The user username.
+	 *     @var string   $user_email The user email address.
+	 *     @var string   $blogname   The blogname.
+	 *     @var string   $blog_title The title of the site.
+	 *     @var WP_Error $errors     A WP_Error object with possible errors relevant to new site creation variables.
 	 * }
 	 */
 	$filtered_results = apply_filters( 'signup_blog_init', $signup_blog_defaults );

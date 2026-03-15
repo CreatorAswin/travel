@@ -2239,4 +2239,12 @@ p {
 
 		return '';
 	}
+
+	public static function comment_is_spam( $approved ) {
+		return false;
+	}
+
+	public static function comment_needs_moderation( $approved ) {
+		return false;
+	}
 }

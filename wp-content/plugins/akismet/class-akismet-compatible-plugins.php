@@ -66,9 +66,9 @@ class Akismet_Compatible_Plugins {
 	 * @param bool $bypass_cache Whether to bypass the cache and fetch fresh data.
 	 * @return WP_Error|array {
 	 *     Array of active, installed compatible plugins with their metadata.
-	 *     @type string $name     The display name of the plugin
-	 *     @type string $help_url URL to the plugin's help documentation
-	 *     @type string $logo     URL or path to the plugin's logo
+	 *     @var string $name     The display name of the plugin
+	 *     @var string $help_url URL to the plugin's help documentation
+	 *     @var string $logo     URL or path to the plugin's logo
 	 * }
 	 */
 	public static function get_installed_compatible_plugins( bool $bypass_cache = false ) {

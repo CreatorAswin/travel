@@ -89,6 +89,13 @@ define( 'WP_DEBUG', false );
 
 /* Add any custom values between this line and the "stop editing" line. */
 
+/** Include IDE Compatibility Stubs */
+if ( file_exists( __DIR__ . '/_ide_compatibility.php' ) ) {
+    require_once __DIR__ . '/_ide_compatibility.php';
+}
+if ( file_exists( __DIR__ . '/_ide_wp_cli_utils.php' ) ) {
+    require_once __DIR__ . '/_ide_wp_cli_utils.php';
+}
 
 
 /* That's all, stop editing! Happy publishing. */

@@ -4,6 +4,20 @@
  * Rich dummy data for all Custom Post Types
  */
 
+/**
+ * Helper to replace deprecated get_page_by_title
+ */
+function pt_get_post_by_title($title, $post_type = 'page') {
+    $query = new WP_Query(array(
+        'post_type'      => $post_type,
+        'title'          => $title,
+        'post_status'    => 'publish',
+        'posts_per_page' => 1,
+        'no_found_rows'  => true,
+    ));
+    return $query->have_posts() ? $query->next_post() : null;
+}
+
 function premium_travels_insert_sample_data()
 {
     // Check if data already exists to prevent duplicates
@@ -49,7 +63,7 @@ function premium_travels_insert_sample_data()
     ];
 
     foreach ($locations as $loc) {
-        if (!get_page_by_title($loc['title'], OBJECT, 'location')) {
+        if (!pt_get_post_by_title($loc['title'], 'location')) {
             $id = wp_insert_post(['post_title' => $loc['title'], 'post_type' => 'location', 'post_status' => 'publish']);
             if ($id) {
                 update_post_meta($id, 'state', $loc['state']);
@@ -145,7 +159,7 @@ function premium_travels_insert_sample_data()
     ];
 
     foreach ($packages as $pkg) {
-        if (!get_page_by_title($pkg['title'], OBJECT, 'taxi_package')) {
+        if (!pt_get_post_by_title($pkg['title'], 'taxi_package')) {
             $post_id = wp_insert_post([
                 'post_title' => $pkg['title'],
                 'post_type' => 'taxi_package',
@@ -179,7 +193,7 @@ function premium_travels_insert_sample_data()
     ];
 
     foreach ($car_types as $car) {
-        if (!get_page_by_title($car['title'], OBJECT, 'car_type')) {
+        if (!pt_get_post_by_title($car['title'], 'car_type')) {
             $post_id = wp_insert_post([
                 'post_title' => $car['title'],
                 'post_type' => 'car_type',
@@ -257,7 +271,7 @@ function premium_travels_insert_sample_data()
     ];
 
     foreach ($holidays as $holiday) {
-        if (!get_page_by_title($holiday['title'], OBJECT, 'holiday_package')) {
+        if (!pt_get_post_by_title($holiday['title'], 'holiday_package')) {
             $post_id = wp_insert_post([
                 'post_title' => $holiday['title'],
                 'post_type' => 'holiday_package',
@@ -291,7 +305,7 @@ function premium_travels_insert_sample_data()
     ];
 
     foreach ($testimonials as $testi) {
-        if (!get_page_by_title($testi['title'], OBJECT, 'testimonial')) {
+        if (!pt_get_post_by_title($testi['title'], 'testimonial')) {
             $post_id = wp_insert_post([
                 'post_title' => $testi['title'],
                 'post_type' => 'testimonial',
@@ -317,7 +331,7 @@ function premium_travels_insert_sample_data()
     ];
 
     foreach ($offers as $offer) {
-        if (!get_page_by_title($offer['title'], OBJECT, 'special_offer')) {
+        if (!pt_get_post_by_title($offer['title'], 'special_offer')) {
             $post_id = wp_insert_post([
                 'post_title' => $offer['title'],
                 'post_type' => 'special_offer',
@@ -346,7 +360,7 @@ function premium_travels_insert_sample_data()
     ];
 
     foreach ($routes as $route) {
-        if (!get_page_by_title($route['title'], OBJECT, 'route')) {
+        if (!pt_get_post_by_title($route['title'], 'route')) {
             $post_id = wp_insert_post([
                 'post_title' => $route['title'],
                 'post_type' => 'route',
@@ -371,7 +385,7 @@ function premium_travels_insert_sample_data()
     $cities = ['Bhubaneswar', 'Puri', 'Cuttack', 'Konark', 'Berhampur'];
     foreach ($cities as $city) {
         $title = 'Taxi Services in ' . $city;
-        if (!get_page_by_title($title, OBJECT, 'city_service')) {
+        if (!pt_get_post_by_title($title, 'city_service')) {
             wp_insert_post([
                 'post_title' => $title,
                 'post_type' => 'city_service',
@@ -402,7 +416,7 @@ function premium_travels_insert_sample_data()
     ];
 
     foreach ($products as $prod) {
-        if (!get_page_by_title($prod['title'], OBJECT, 'pt_product')) {
+        if (!pt_get_post_by_title($prod['title'], 'pt_product')) {
             $post_id = wp_insert_post([
                 'post_title' => $prod['title'],
                 'post_type' => 'pt_product',

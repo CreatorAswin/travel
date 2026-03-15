@@ -94,7 +94,14 @@ function premium_travels_create_pages_and_menus()
     $page_ids = array();
     foreach ($pages as $page_data) {
         // Check if page exists
-        $page = get_page_by_title($page_data['title']);
+        $page_query = new WP_Query(array(
+            'post_type' => 'page',
+            'title'     => $page_data['title'],
+            'post_status' => 'publish',
+            'posts_per_page' => 1,
+            'no_found_rows' => true,
+        ));
+        $page = $page_query->have_posts() ? $page_query->next_post() : null;
 
         if (!$page) {
             $page_args = array(
@@ -106,7 +113,15 @@ function premium_travels_create_pages_and_menus()
 
             // Set parent if specified
             if (isset($page_data['parent'])) {
-                $parent = get_page_by_title($page_data['parent']);
+                $parent_query = new WP_Query(array(
+                    'post_type' => 'page',
+                    'title'     => $page_data['parent'],
+                    'post_status' => 'publish',
+                    'posts_per_page' => 1,
+                    'no_found_rows' => true,
+                ));
+                $parent = $parent_query->have_posts() ? $parent_query->next_post() : null;
+                
                 if ($parent) {
                     $page_args['post_parent'] = $parent->ID;
                 }
