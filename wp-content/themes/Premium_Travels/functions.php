@@ -106,7 +106,7 @@ function premium_travels_scripts()
     wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
 
     // Custom beautification stylesheet (loaded last so it overrides)
-    wp_enqueue_style('pt-custom-style', get_template_directory_uri() . '/style-custom.css', array(), '1.0.9');
+    wp_enqueue_style('pt-custom-style', get_template_directory_uri() . '/style-custom.css', array(), '1.1.0');
 
     // Scripts
     // Deregister WordPress jQuery and register the one from the old site (or use WP's if compatible - relying on old site's version to ensure compatibility with their plugins)

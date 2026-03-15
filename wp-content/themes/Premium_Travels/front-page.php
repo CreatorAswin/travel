@@ -267,14 +267,14 @@ get_header();
                     
                     <!-- City Filter Dropdown -->
                     <div class="form-group" style="margin-bottom:20px;">
-                        <select id="product-city-filter" class="form-control" style="border-radius:8px;border:1.5px solid #dde3ef;height:44px;font-family:'Poppins',sans-serif;font-size:13px;width:100%;">
+                        <select id="product-city-filter">
                             <option value="all">All Cities</option>
                             <?php echo get_location_options(); ?>
                         </select>
                     </div>
 
                     <!-- Products List Container -->
-                    <div class="products-list-container" style="display:flex;flex-direction:column;gap:15px;max-height:600px;overflow-y:auto;padding-right:5px;overflow-x:hidden;">
+                    <div class="products-list-container">
                         <?php
                         global $wpdb;
                         
@@ -284,7 +284,7 @@ get_header();
                         
                         // Get products from database (latest first)
                         $products = $products_manager->get_all(array(
-                            'limit' => -1,
+                            'limit' => 10,
                             'status' => 'active',
                             'orderby' => 'created_at',
                             'order' => 'DESC'
@@ -292,52 +292,67 @@ get_header();
                         
                         if (!empty($products)):
                             foreach ($products as $product):
-                                $p_price = $product->price_regular ?: 'Contact';
-                                $p_city = '';
-                                if ($product->location_id) {
-                                    $location = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}pt_locations WHERE id = %d AND is_active = 1", $product->location_id));
-                                    if ($location) {
-                                        $p_city = $location->title;
-                                    } else {
-                                        // Debug info for location issues
-                                        $p_city = '[Location ID ' . $product->location_id . ' not found]';
-                                    }
-                                }
-                                $p_city_simple = trim(explode(',', $p_city)[0]);
+                                // Pricing logic (sale price check)
+                                $sale = floatval($product->price_sale);
+                                $reg  = floatval($product->price_regular);
+                                $display_price = ($sale > 0 && $sale < $reg) ? $sale : $reg;
+                                
+                                // Location - use join result from manager
+                                $p_city = $product->location_name ?? '';
+                                $p_city_simple = $p_city ? trim(explode(',', $p_city)[0]) : '';
+                                
                                 $product_url = home_url('/product/' . $product->slug);
-                        ?>
-                        <?php
-                                // Get product image
+                                
+                                // Get product image with placeholder fallback
                                 $p_img = $product->featured_image ?? '';
                                 if (empty($p_img) && !empty($product->gallery_images)) {
-                                    $imgs = explode(',', $product->gallery_images);
+                                    $imgs = is_array($product->gallery_images) ? $product->gallery_images : explode(',', $product->gallery_images);
                                     $p_img = trim($imgs[0]);
                                 }
-                                ?>
-                                <div class="product-item tr-total" data-city="<?php echo esc_attr(strtolower($p_city_simple)); ?>" style="background:#fff;border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm);border:1px solid #e8eef5;transition:var(--transition);display:flex;flex-direction:column;">
-                                    <!-- Product Image -->
-                                    <a href="<?php echo esc_url($product_url); ?>" style="display:block;height:150px;overflow:hidden;background:#f0f4f8;position:relative;">
+                        ?>
+                                <div class="pt-sidebar-product-card pt-product-card" data-city="<?php echo esc_attr(strtolower($p_city_simple)); ?>">
+                                    <!-- 1. Product Image -->
+                                    <a href="<?php echo esc_url($product_url); ?>" class="pt-product-card__image">
                                         <?php if ($p_img): ?>
-                                            <img src="<?php echo esc_url($p_img); ?>" alt="<?php echo esc_attr($product->title); ?>" style="width:100%;height:100%;object-fit:cover;transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.06)'" onmouseout="this.style.transform='scale(1)'" loading="lazy" />
+                                            <img src="<?php echo esc_url($p_img); ?>" alt="<?php echo esc_attr($product->title); ?>" loading="lazy" />
                                         <?php else: ?>
-                                            <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><i class="fa fa-image" style="font-size:40px;color:#c8d5e8;"></i></div>
+                                            <div class="pt-product-card__no-img">
+                                                <i class="fa fa-suitcase-rolling"></i>
+                                                <span>Product</span>
+                                            </div>
                                         <?php endif; ?>
-                                        <?php if (!empty($product->product_type)): ?>
-                                            <span style="position:absolute;top:8px;left:8px;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase;"><?php echo esc_html(ucfirst($product->product_type)); ?></span>
-                                        <?php endif; ?>
+                                        <span class="pt-product-card__badge"><?php echo esc_html($product->product_type ? ucfirst(str_replace('_', ' ', $product->product_type)) : 'Tour'); ?></span>
                                     </a>
-                                    <!-- Card body -->
-                                    <div style="padding:12px;flex:1;display:flex;flex-direction:column;">
-                                        <a href="<?php echo esc_url($product_url); ?>" style="text-decoration:none;color:inherit;">
-                                            <h4 style="font-size:14px;font-weight:700;color:var(--secondary);margin:0 0 5px;line-height:1.3;"><?php echo esc_html($product->title); ?></h4>
-                                            <?php if ($p_city): ?>
-                                                <div style="font-size:11px;color:var(--text-light);margin-bottom:7px;"><i class="fa fa-map-marker-alt" style="color:var(--primary);margin-right:3px;"></i><?php echo esc_html($p_city); ?></div>
+                                    
+                                    <!-- 2. Card Body -->
+                                    <div class="pt-product-card__body">
+                                        <!-- Product Name -->
+                                        <h4 class="pt-product-card__title">
+                                            <a href="<?php echo esc_url($product_url); ?>"><?php echo esc_html($product->title); ?></a>
+                                        </h4>
+                                        
+                                        <!-- City / Location -->
+                                        <?php if ($p_city): ?>
+                                            <div class="pt-product-card__location">
+                                                <i class="fa fa-map-marker-alt"></i>
+                                                <span><?php echo esc_html($p_city); ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                        
+                                        <!-- Price -->
+                                        <div class="pt-product-card__price">
+                                            <span class="pt-product-card__price-current">
+                                                <i class="fa fa-rupee-sign"></i><?php echo number_format($display_price, 0); ?>
+                                            </span>
+                                            <?php if($sale > 0 && $sale < $reg): ?>
+                                                <span class="pt-product-card__price-old">₹<?php echo number_format($reg, 0); ?></span>
                                             <?php endif; ?>
-                                            <div style="font-size:17px;font-weight:800;color:var(--primary);margin-bottom:10px;"><i class="fa fa-rupee-sign" style="font-size:14px;"></i> <?php echo esc_html(number_format($p_price, 2)); ?></div>
-                                        </a>
-                                        <div style="display:flex;gap:6px;margin-top:auto;">
-                                            <a href="<?php echo esc_url(home_url('/cart?product_id=' . $product->id . '&product_slug=' . $product->slug)); ?>" class="df-button2" style="flex:1;justify-content:center;font-size:11px;padding:6px 8px;text-align:center;"><i class="fa fa-shopping-cart" style="margin-right:3px;"></i>Add to Cart</a>
-                                            <a href="<?php echo esc_url(home_url('/buy-now?product_id=' . $product->id . '&product_slug=' . $product->slug)); ?>" class="df-button1" style="flex:1;justify-content:center;font-size:11px;padding:6px 8px;text-align:center;"><i class="fa fa-bolt" style="margin-right:3px;"></i>Buy Now</a>
+                                        </div>
+                                        
+                                        <!-- Add to Cart & Buy Now -->
+                                        <div class="pt-product-card__actions">
+                                            <a href="<?php echo esc_url(home_url('/cart?product_id=' . $product->id . '&product_slug=' . $product->slug)); ?>" class="df-button2"><i class="fa fa-shopping-cart" style="margin-right:4px;"></i>Add to Cart</a>
+                                            <a href="<?php echo esc_url(home_url('/buy-now?product_id=' . $product->id . '&product_slug=' . $product->slug)); ?>" class="df-button1"><i class="fa fa-bolt" style="margin-right:4px;"></i>Buy Now</a>
                                         </div>
                                     </div>
                                 </div>
@@ -345,7 +360,10 @@ get_header();
                             endforeach;
                         else:
                         ?>
-                            <div style="font-size:13px;color:#999;text-align:center;padding:20px;border:1px dashed #ccc;border-radius:8px;">No products available.</div>
+                            <div class="pt-product-empty">
+                                <i class="fa fa-box-open"></i>
+                                No products available.
+                            </div>
                         <?php endif; ?>
                     </div>
 
@@ -353,20 +371,30 @@ get_header();
                     <script>
                         document.addEventListener("DOMContentLoaded", function () {
                             var filter = document.getElementById("product-city-filter");
-                            var items = document.querySelectorAll(".product-item");
-                            if(filter) {
-                                filter.addEventListener("change", function () {
-                                    var selected = this.value.toLowerCase().split(",")[0].trim();
-                                    items.forEach(function (item) {
-                                        var itemCity = item.getAttribute("data-city");
-                                        if (selected === "all" || selected === "" || itemCity === selected) {
-                                            item.style.display = "block";
-                                        } else {
-                                            item.style.display = "none";
-                                        }
-                                    });
+                            var container = document.querySelector(".products-list-container");
+                            if (!filter || !container) return;
+
+                            var items = container.querySelectorAll(".pt-sidebar-product-card");
+
+                            filter.addEventListener("change", function () {
+                                var raw = this.value;
+                                // "all" means show everything
+                                if (raw === "all" || raw === "") {
+                                    items.forEach(function (item) { item.style.display = ""; });
+                                    return;
+                                }
+                                // Normalize: take first part before comma, lowercase, trim
+                                var selected = raw.toLowerCase().split(",")[0].trim();
+
+                                items.forEach(function (item) {
+                                    var itemCity = (item.getAttribute("data-city") || "").trim().toLowerCase();
+                                    if (itemCity === selected) {
+                                        item.style.display = "";
+                                    } else {
+                                        item.style.display = "none";
+                                    }
                                 });
-                            }
+                            });
                         });
                     </script>
                 </div>

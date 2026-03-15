@@ -56,6 +56,19 @@ function premium_travels_create_pages_and_menus()
             'template' => 'page-visa.php',
         ),
 
+        array(
+            'title' => 'Products',
+            'template' => 'page-products.php',
+        ),
+        array(
+            'title' => 'Cart',
+            'template' => 'page-cart.php',
+        ),
+        array(
+            'title' => 'Buy Now',
+            'template' => 'page-buy-now.php',
+        ),
+
         // Car Rental City Pages
         array(
             'title' => 'Taxi Services in Bhubaneswar',
