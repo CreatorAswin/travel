@@ -2245,10 +2245,14 @@ footer .container,
     box-shadow: 0 3px 14px rgba(0, 0, 0, .06) !important;
     border: 1px solid #eef2f6 !important;
     transition: var(--transition) !important;
-    display: flex !important;
+    display: flex;
     flex-direction: column !important;
     min-height: 380px !important; /* Ensure it has enough space */
     width: 100% !important;
+}
+
+.pt-hidden {
+    display: none !important;
 }
 
 .pt-product-card:hover {

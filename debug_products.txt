@@ -1,0 +1,10 @@
+﻿ID | Title | Location Name | Data City (Simple)
+--------------------------------------------------------------------------------
+1 | Lingaraj Temple Darshan | New Delhi | new delhi
+2 | Udayagiri & Khandagiri Caves | New Delhi | new delhi
+3 | Puri Beach & Sea Walk | Chennai, Tamil Nadu | chennai
+4 | Konark Sun Temple Architecture Tour | Rourkela, Odisha | rourkela
+5 | Test Product 1771757997 | New Delhi | new delhi
+6 | Test Product Fix | NULL | 
+7 | Orange | NULL | 
+

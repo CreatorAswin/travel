@@ -266,8 +266,8 @@ get_header();
                     </div>
                     
                     <!-- City Filter Dropdown -->
-                    <div class="form-group" style="margin-bottom:20px;">
-                        <select id="product-city-filter">
+                    <div class="form-group pt-city-filter-wrap" style="margin-bottom:20px;">
+                        <select id="product-city-filter" class="selectpicker" data-live-search="true" data-width="100%">
                             <option value="all">All Cities</option>
                             <?php echo get_location_options(); ?>
                         </select>
@@ -369,29 +369,37 @@ get_header();
 
                     <!-- Client-side filter script -->
                     <script>
-                        document.addEventListener("DOMContentLoaded", function () {
-                            var filter = document.getElementById("product-city-filter");
-                            var container = document.querySelector(".products-list-container");
-                            if (!filter || !container) return;
-
-                            var items = container.querySelectorAll(".pt-sidebar-product-card");
-
-                            filter.addEventListener("change", function () {
-                                var raw = this.value;
+                        jQuery(document).ready(function ($) {
+                            // Using event delegation to be more robust
+                            $(document).on('change changed.bs.select', '#product-city-filter', function (e) {
+                                var raw = $(this).val();
+                                console.log('Filter changed to:', raw);
+                                
+                                var $items = $(".pt-sidebar-product-card");
+                                
                                 // "all" means show everything
-                                if (raw === "all" || raw === "") {
-                                    items.forEach(function (item) { item.style.display = ""; });
+                                if (raw === "all" || !raw) {
+                                    console.log('Resetting filter - showing all items');
+                                    $items.removeClass('pt-hidden').fadeIn(300);
                                     return;
                                 }
-                                // Normalize: take first part before comma, lowercase, trim
-                                var selected = raw.toLowerCase().split(",")[0].trim();
 
-                                items.forEach(function (item) {
-                                    var itemCity = (item.getAttribute("data-city") || "").trim().toLowerCase();
-                                    if (itemCity === selected) {
-                                        item.style.display = "";
+                                // Normalize selected city: lowercase, first part before comma, trim
+                                var selected = raw.toLowerCase().split(",")[0].trim();
+                                console.log('Normalized selected city:', selected);
+
+                                $items.each(function () {
+                                    var $item = $(this);
+                                    var itemCity = ($item.attr("data-city") || "").trim().toLowerCase();
+                                    
+                                    // Check if item matches 
+                                    var matches = (itemCity === selected);
+                                    
+                                    if (matches) {
+                                        $item.removeClass('pt-hidden').fadeIn(300);
                                     } else {
-                                        item.style.display = "none";
+                                        // Adding a small delay or hide to ensure it works with CSS transitions if any
+                                        $item.addClass('pt-hidden').hide();
                                     }
                                 });
                             });

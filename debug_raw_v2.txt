@@ -1,0 +1,69 @@
+﻿--- FILTER HTML ---
+<div class="form-group pt-city-filter-wrap" style="margin-bottom:20px;">
+                        <select id="product-city-filter" class="selectpicker" data-live-search="true" data-width="100%">
+                            <option value="all">All Cities</option>
+                            <option value="Berhampur, Odisha">Berhampur, Odisha</option><option value="Bhubaneswar, Odisha">Bhubaneswar, Odisha</option><option value="Chennai, Tamil Nadu">Chennai, Tamil Nadu</option><option value="Cuttack, Odisha">Cuttack, Odisha</option><option value="Khordha, Odisha">Khordha, Odisha</option><option value="Kolkata, West Bengal">Kolkata, West Bengal</option><option value="Konark, Odisha">Konark, Odisha</option><option value="New Delhi">New Delhi</option><option value="Puri, Odisha">Puri, Odisha</option><option value="Rourkela, Odisha">Rourkela, Odisha</option>                        </select>
+                    </div>
+
+--- PRODUCT CARD HTML (First one) ---
+<div class="pt-sidebar-product-card pt-product-card" data-city="">
+                                    <!-- 1. Product Image -->
+                                    <a href="http://localhost/travel/product/orange" class="pt-product-card__image">
+                                                                                    <img src="http://localhost/travel/wp-content/uploads/2026/02/fresh-orange.png" alt="Orange" loading="lazy" />
+                                                                                <span class="pt-product-card__badge">Tour</span>
+                                    </a>
+                                    
+                                    <!-- 2. Card Body -->
+                                    <div class="pt-product-card__body">
+                                        <!-- Product Name -->
+                                        <h4 class="pt-product-card__title">
+                                            <a href="http://localhost/travel/product/orange">Orange</a>
+                                        </h4>
+                                        
+                                        <!-- City / Location -->
+                                                                                
+                                        <!-- Price -->
+                                        <div class="pt-product-card__price">
+                                            <span class="pt-product-card__price-current">
+                                                <i class="fa fa-rupee-sign"></i>30                                            </span>
+                                                                                    </div>
+
+--- JS SCRIPT ---
+<script>
+                        jQuery(document).ready(function ($) {
+                            // Using event delegation to be more robust
+                            $(document).on('change changed.bs.select', '#product-city-filter', function (e) {
+                                var raw = $(this).val();
+                                console.log('Filter changed to:', raw);
+                                
+                                var $items = $(".pt-sidebar-product-card");
+                                
+                                // "all" means show everything
+                                if (raw === "all" || !raw) {
+                                    console.log('Resetting filter - showing all items');
+                                    $items.fadeIn(200);
+                                    return;
+                                }
+
+                                // Normalize selected city: lowercase, first part before comma, trim
+                                var selected = raw.toLowerCase().split(",")[0].trim();
+                                console.log('Normalized selected city:', selected);
+
+                                $items.each(function () {
+                                    var $item = $(this);
+                                    var itemCity = ($item.attr("data-city") || "").trim().toLowerCase();
+                                    
+                                    // Check if item matches 
+                                    var matches = (itemCity === selected);
+                                    // console.log('Item city:', itemCity, 'matches:', matches);
+                                    
+                                    if (matches) {
+                                        $item.fadeIn(200);
+                                    } else {
+                                        $item.hide();
+                                    }
+                                });
+                            });
+                        });
+                    </script>
+
